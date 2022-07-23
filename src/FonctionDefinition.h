@@ -23,6 +23,9 @@ namespace FPL {
         std::vector<std::string> FonctionContent;
         bool HasArgument = false;
         int NumberArgument = 0;
+        bool HasReturn = false;
+        std::string ReturnValue;
+        Type ReturnType;
 
         [[maybe_unused]] void FDebugPrint() const;
     };
