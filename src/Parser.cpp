@@ -7,6 +7,23 @@ namespace FPL {
         mTypes["decimal"] = Type("decimal", DOUBLE);
         mTypes["texte"] = Type("texte", STRING);
         mTypes["auto"] = Type("auto", AUTO);
+
+        InstructionsList = {
+                "envoyer",
+                "appeler",
+                "renvoyer",
+                "definir",
+                "variable",
+                "changer",
+                "saisir",
+                "fonction",
+                "globale",
+                "entier",
+                "decimal",
+                "texte",
+                "vide",
+                "auto"
+        };
     }
 
     bool Parser::AppelerInstruction() {
@@ -15,87 +32,19 @@ namespace FPL {
             if (isFonction(PossibleFonctionName->mText)) {
                 FonctionDefinition fonction = mFonctions[PossibleFonctionName->mText];
 
+                if (fonction.HasReturn) {
+                    std::cerr << "Vous devez utiliser une variable et non une appellation classique, il faut vous que vous recuperiez la valeur de retour." << std::endl;
+                    exit(1);
+                }
+
                 if (!fonction.HasArgument) {
                     if (!CheckerOperateur(";").has_value()) {
                         std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
+                        exit(1);
                     }
                 }
 
-                if (fonction.HasArgument) {
-                    if (CheckerOperateur(":").has_value()) {
-                        while (fonction.NumberArgument > 0) {
-                            auto name = CheckerIdentifiant();
-                            if (!name.has_value()) {
-                                std::cerr << "Veuillez specifier le nom du parametre." << std::endl;
-                            }
-
-                            if (!isFonctionArgument(PossibleFonctionName->mText, name->mText)) {
-                                std::cerr << "Ce parametre n'existe pas dans la fonction " << PossibleFonctionName->mText << "." << std::endl;
-                            }
-
-                            auto value = CheckerValue();
-                            if (!value.has_value()) {
-                                std::cerr << "Veuillez donner une valeur au parametre '" << name->mText << "'." << std::endl;
-                            }
-
-                            auto parametre = getArgument(PossibleFonctionName->mText, name->mText);
-                            if (parametre->ArgType.mType == value->StatementType.mType && parametre->ArgType.mType != AUTO) {
-                                if (value->StatementType.mType == STRING) {
-                                    std::replace(value->StatementName.begin(), value->StatementName.end(), '"', ' ');
-                                }
-                                parametre->ArgValue = value->StatementName;
-                            } else if (parametre->ArgType.mType == AUTO && parametre->ArgType.mType != value->StatementType.mType) {
-                                parametre->ArgType = Type("auto", AUTO);
-                                parametre->ArgValue = value->StatementName;
-                            } else {
-                                std::cerr << "Le type de votre valeur doit être identique a celui de l'argument." << std::endl;
-                            }
-
-                            ArgumentDefinition argument;
-                            argument.ArgName = parametre->ArgName;
-                            argument.ArgType = Type(parametre->ArgType.mName, parametre->ArgType.mType);
-                            argument.ArgValue = parametre->ArgValue;
-                            mArguments[fonction.FonctionName][argument.ArgName] = argument;
-
-                            if (fonction.NumberArgument > 1 && !CheckerOperateur(",").has_value()) {
-                                std::cerr << "Veuillez separer les different arguments par le symbole ','." << std::endl;
-                            }
-                            fonction.NumberArgument -= 1;
-                        }
-                        if (!CheckerOperateur(";").has_value()) {
-                            std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
-                        }
-                    } else {
-                        std::cerr << "La fonction a des parametres, vous devez obligatoirement leur donner une valeur." << std::endl;
-                    }
-                }
-
-                if (!fonction.FonctionContent.empty()) {
-                    std::string finalContent;
-                    for (auto const &a : fonction.FonctionContent) {
-                        finalContent.append(a).append(" ");
-                    }
-                    TokenBuilding t;
-                    std::cout << "" << std::endl; // IGNORE (finalContent) -> sans le print, cela ne marche plus.
-                    std::vector<Token> tokens = t.parseToken(finalContent);
-
-                    auto FCurrToken = tokens.begin();
-                    auto oldCurrentToken = mCurrentToken;
-                    std::optional<FonctionDefinition> f = fonction;
-                    parse(tokens, f);
-                    mCurrentToken = oldCurrentToken;
-
-                    std::vector<std::string> toErase;
-                    for(auto const &var: mVariables) {
-                        if(var.second.InFonction && !var.second.IsGlobal) {
-                            toErase.push_back(var.first);
-                        }
-                    }
-                    for(auto const &it: toErase)
-                    {
-                        mVariables.erase(it);
-                    }
-                }
+                executeFonctionContent(fonction, PossibleFonctionName->mText);
                 return true;
             }
         }
@@ -104,11 +53,17 @@ namespace FPL {
 
     bool Parser::FonctionInstruction(auto parseStart) {
         auto PeutEtreNom = CheckerIdentifiant();
+
+        if (std::find(InstructionsList.begin(), InstructionsList.end(), PeutEtreNom->mText) != InstructionsList.end()) {
+            std::cerr << "Le nom doit etre different des types, des instructions." << std::endl;
+            exit(1);
+        }
+
         if (PeutEtreNom.has_value()) {
             if (CheckerOperateur("(").has_value()) {
                 if (isFonction(PeutEtreNom->mText)) {
                     std::cerr << "Cette fonction est deja existante, donner un autre nom a cette derniere." << std::endl;
-                    return false;
+                    exit(1);
                 }
 
                 FonctionDefinition fonction;
@@ -121,17 +76,20 @@ namespace FPL {
                             break;
                         } else {
                             std::cerr << "Vous devez fermer les parentheses de la fonction." << std::endl;
+                            exit(1);
                         }
                     }
 
                     if (!type.has_value()) {
                         std::cerr << "Vous devez spécifier un type d'argument." << std::endl;
+                        exit(1);
                     }
 
                     // Ajout de l'argument...
                     auto possibleArg = CheckerIdentifiant();
                     if (!possibleArg.has_value()) {
                         std::cerr << "Vous devez spécifier un nom unique a l'argument." << std::endl;
+                        exit(1);
                     }
                     ArgumentDefinition param;
                     param.ArgType.mName = type->mName;
@@ -146,20 +104,54 @@ namespace FPL {
                     }
                     if (!CheckerOperateur(",").has_value()) {
                         std::cerr << "Vous devez utiliser la ',' pour separer les arguments de la fonction." << std::endl;
+                        exit(1);
                     }
                 }
 
                 // On récupère le code entre les {} :
                 if (CheckerOperateur("{")) {
                     while (!CheckerOperateur("}").has_value()) {
+                        if (mCurrentToken->mText == "renvoyer") {
+                            ++mCurrentToken;
+                            auto v = CheckerValue();
+                            if (v.has_value()) {
+                                if (CheckerOperateur(";").has_value()) {
+                                    fonction.HasReturn = true;
+                                    fonction.ReturnValue = v->StatementName;
+                                    fonction.ReturnType = v->StatementType;
+
+                                    if (CheckerIdentifiant().has_value() || CheckerValue().has_value() || CheckerType().has_value()) {
+                                        std::cerr << "Vous ne pouvez plus rajouter d'instruction ou autre apres l'instruction 'renvoyer'." << std::endl;
+                                        exit(1);
+                                    }
+
+                                    break;
+                                } else {
+                                    std::cerr << "Vous devez utiliser la ';' pour mettre fin a l'instruction." << std::endl;
+                                    exit(1);
+                                }
+                            } else {
+                                std::cerr << "Veuillez indiquer la valeur de retour de la fonction '" << fonction.FonctionName << "'." << std::endl;
+                                exit(1);
+                            }
+                        }
+
                         if (mCurrentToken->mType == CHAINE_LITERAL) {
                             mCurrentToken->mText += "\"";
                         }
-                        fonction.FonctionContent.push_back(mCurrentToken->mText);
+
+                        fonction.FonctionContent .push_back(mCurrentToken->mText);
                         ++mCurrentToken;
 
                         if (CheckerOperateur("}").has_value()) {
                             break;
+                        }
+                    }
+
+                    if (fonction.HasReturn) {
+                        if (!CheckerOperateur("}").has_value()) {
+                            std::cerr << "Vous devez utiliser '}' pour mettre fin a la fonction." << std::endl;
+                            exit(1);
                         }
                     }
                 }
@@ -168,15 +160,100 @@ namespace FPL {
                 return true;
             } else {
                 mCurrentToken = parseStart;
-                std::cerr
-                        << "Vous devez ouvrir les parenthèses pour ajouter des paramètres si vous le souhaitez."
-                        << std::endl;
+                std::cerr << "Vous devez ouvrir les parenthèses pour ajouter des paramètres si vous le souhaitez." << std::endl;
+                exit(1);
             }
         } else {
             mCurrentToken = parseStart;
             std::cerr << "Vous devez donner un nom a votre fonction." << std::endl;
+            exit(1);
         }
         return false;
+    }
+
+    void Parser::executeFonctionContent(FonctionDefinition& fonction, std::string fonctionName) {
+        if (fonction.HasArgument) {
+            if (CheckerOperateur(":").has_value()) {
+                while (fonction.NumberArgument > 0) {
+                    auto name = CheckerIdentifiant();
+                    if (!name.has_value()) {
+                        std::cerr << "Veuillez specifier le nom du parametre." << std::endl;
+                        exit(1);
+                    }
+
+                    if (!isFonctionArgument(fonctionName, name->mText)) {
+                        std::cerr << "Ce parametre n'existe pas dans la fonction " << fonctionName << "." << std::endl;
+                        exit(1);
+                    }
+
+                    auto value = CheckerValue();
+                    if (!value.has_value()) {
+                        std::cerr << "Veuillez donner une valeur au parametre '" << name->mText << "'." << std::endl;
+                        exit(1);
+                    }
+
+                    auto parametre = getArgument(fonctionName, name->mText);
+                    if (parametre->ArgType.mType == value->StatementType.mType && parametre->ArgType.mType != AUTO) {
+                        if (value->StatementType.mType == STRING) {
+                            std::replace(value->StatementName.begin(), value->StatementName.end(), '"', ' ');
+                        }
+                        parametre->ArgValue = value->StatementName;
+                    } else if (parametre->ArgType.mType == AUTO && parametre->ArgType.mType != value->StatementType.mType) {
+                        parametre->ArgType = Type("auto", AUTO);
+                        parametre->ArgValue = value->StatementName;
+                    } else {
+                        std::cerr << "Le type de votre valeur doit être identique a celui de l'argument." << std::endl;
+                        exit(1);
+                    }
+
+                    ArgumentDefinition argument;
+                    argument.ArgName = parametre->ArgName;
+                    argument.ArgType = Type(parametre->ArgType.mName, parametre->ArgType.mType);
+                    argument.ArgValue = parametre->ArgValue;
+                    mArguments[fonction.FonctionName][argument.ArgName] = argument;
+
+                    if (fonction.NumberArgument > 1 && !CheckerOperateur(",").has_value()) {
+                        std::cerr << "Veuillez separer les different arguments par le symbole ','." << std::endl;
+                        exit(1);
+                    }
+                    fonction.NumberArgument -= 1;
+                }
+                if (!CheckerOperateur(";").has_value()) {
+                    std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
+                    exit(1);
+                }
+            } else {
+                std::cerr << "La fonction a des parametres, vous devez obligatoirement leur donner une valeur." << std::endl;
+                exit(1);
+            }
+        }
+
+        if (!fonction.FonctionContent.empty()) {
+            std::string finalContent;
+            for (auto const &a : fonction.FonctionContent) {
+                finalContent.append(a).append(" ");
+            }
+            TokenBuilding t;
+            std::cout << "" << std::endl; // IGNORE (finalContent) -> sans le print, cela ne marche plus.
+            std::vector<Token> tokens = t.parseToken(finalContent);
+
+            auto FCurrToken = tokens.begin();
+            auto oldCurrentToken = mCurrentToken;
+            std::optional<FonctionDefinition> f = fonction;
+            parse(tokens, f);
+            mCurrentToken = oldCurrentToken;
+
+            std::vector<std::string> toErase;
+            for(auto const &var: mVariables) {
+                if(var.second.InFonction && !var.second.IsGlobal) {
+                    toErase.push_back(var.first);
+                }
+            }
+            for(auto const &it: toErase)
+            {
+                mVariables.erase(it);
+            }
+        }
     }
 
     bool Parser::VariableInstruction(std::optional<FonctionDefinition>& fonction) {
@@ -186,18 +263,23 @@ namespace FPL {
 
             if (isVariable(VarName->mText)) {
                 std::cerr << "Veuillez choisir un autre nom pour votre variable." << std::endl;
-                return false;
+                exit(1);
             }
 
             if (VarName.has_value()) {
                 if (VarName->mText == "saisir") {
                     VarName = CheckerIdentifiant();
-                    if (VarName.has_value()) {
 
+                    if (std::find(InstructionsList.begin(), InstructionsList.end(), VarName->mText) != InstructionsList.end()) {
+                        std::cerr << "Le nom doit etre different des types, des instructions." << std::endl;
+                        exit(1);
+                    }
+
+                    if (VarName.has_value()) {
                         if (fonction != std::nullopt) {
                             if (isArgument(fonction->FonctionName, VarName->mText)) {
                                 std::cerr << "Le nom de la variable ne peut pas etre le meme que celui d'un argument de la fonction : " << fonction->FonctionName << "." << std::endl;
-                                return false;
+                                exit(1);
                             }
                         }
 
@@ -218,6 +300,7 @@ namespace FPL {
                                             std::cout << mArguments[fonction->FonctionName][PossibleArgument->mText].ArgValue << std::endl;
                                         } else {
                                             std::cerr << "L'argument " << PossibleArgument->mText <<" est inexistant ." << std::endl;
+                                            exit(1);
                                         }
                                     }
                                 }
@@ -227,6 +310,7 @@ namespace FPL {
                                     variable.VariableName = VarName->mText;
                                     variable.VariableType = Type(VarType->mName, VarType->mType);
                                     variable.IsGlobal = false;
+                                    variable.HasReturnValue = false;
                                     variable.InFonction = false;
                                     if (fonction.has_value() || fonction != std::nullopt) {
                                         variable.InFonction = true;
@@ -251,9 +335,11 @@ namespace FPL {
                                     return true;
                                 } else {
                                     std::cerr << "Merci de signifier la fin de la declaration de la variable avec ';'." << std::endl;
+                                    exit(1);
                                 }
                             } else {
                                 std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur." << std::endl;
+                                exit(1);
                             }
                         } else {
                             if (CheckerOperateur(";").has_value()) {
@@ -261,6 +347,7 @@ namespace FPL {
                                 variable.VariableName = VarName->mText;
                                 variable.VariableType = Type(VarType->mName, VarType->mType);
                                 variable.IsGlobal = false;
+                                variable.HasReturnValue = false;
                                 variable.InFonction = false;
                                 if (fonction.has_value() || fonction != std::nullopt) {
                                     variable.InFonction = true;
@@ -287,20 +374,27 @@ namespace FPL {
                                 return true;
                             } else {
                                 std::cerr << "Merci de signifier la fin de la declaration de la variable avec ';'." << std::endl;
+                                exit(1);
                             }
                         }
                     } else {
                         std::cerr << "Vous devez indiquer un nom a la variable." << std::endl;
+                        exit(1);
                     }
                 }
                 else if (VarName->mText == "globale") {
                     VarName = CheckerIdentifiant();
                     if (VarName.has_value()) {
 
+                        if (std::find(InstructionsList.begin(), InstructionsList.end(), VarName->mText) != InstructionsList.end()) {
+                            std::cerr << "Le nom doit etre different des types, des instructions." << std::endl;
+                            exit(1);
+                        }
+
                         if (fonction != std::nullopt) {
                             if (isArgument(fonction->FonctionName, VarName->mText)) {
                                 std::cerr << "Le nom de la variable ne peut pas etre le meme que celui d'un argument de la fonction : " << fonction->FonctionName << "." << std::endl;
-                                return false;
+                                exit(1);
                             }
                         }
 
@@ -316,12 +410,13 @@ namespace FPL {
                                         } else {
                                             if (VarType->mType != VarValue->StatementType.mType) {
                                                 std::cerr << "Vous devez donner une valeur a la variable qui correspond au type." << std::endl;
-                                                return false;
+                                                exit(1);
                                             }
 
                                             variable.VariableType = Type(VarType->mName, VarType->mType);
                                         }
                                         variable.IsGlobal = true;
+                                        variable.HasReturnValue = false;
                                         variable.InFonction = false;
                                         if (fonction.has_value() || fonction != std::nullopt) {
                                             variable.InFonction = true;
@@ -332,7 +427,6 @@ namespace FPL {
                                         variable.VariableValue = VarValue->StatementName;
 
                                         mVariables[variable.VariableName] = variable;
-
                                         return true;
                                     }
                                 } else {
@@ -342,6 +436,7 @@ namespace FPL {
                                            VariableDefinition variable;
                                            variable.VariableName = VarName->mText;
                                            variable.IsGlobal = true;
+                                           variable.HasReturnValue = false;
                                            variable.InFonction = false;
                                            if (VarType->mType != AUTO) {
                                                variable.VariableType = Type(VarType->mName, VarType->mType);
@@ -360,7 +455,7 @@ namespace FPL {
                                                } else if (VarType->mType != AUTO) {
                                                    if (VarType->mType != mArguments[fonction->FonctionName][name->mText].ArgType.mType) {
                                                        std::cerr << "Vous devez donner une valeur a la variable qui correspond au type." << std::endl;
-                                                       return false;
+                                                       exit(1);
                                                    }
                                                }
                                            } else if (isVariable(name->mText)) {
@@ -372,7 +467,7 @@ namespace FPL {
                                                } else if (VarType->mType != AUTO) {
                                                    if (VarType->mType != mVariables[name->mText].VariableType.mType) {
                                                        std::cerr << "Vous devez donner une valeur a la variable qui correspond au type." << std::endl;
-                                                       return false;
+                                                       exit(1);
                                                    }
                                                }
                                            }
@@ -381,25 +476,105 @@ namespace FPL {
                                            return true;
                                        } else {
                                            std::cerr << "Merci de signifier la fin de la declaration de la variable avec ';'." << std::endl;
+                                           exit(1);
                                        }
                                     }
                                     std::cerr << "Vous devez donner une valeur a votre variable." << std::endl;
-                                    return false;
+                                    exit(1);
                                 }
                             } else {
                                 std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur." << std::endl;
+                                exit(1);
                             }
                         } else {
                             std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur." << std::endl;
+                            exit(1);
                         }
                     } else {
                         std::cerr << "Vous devez indiquer un nom a la variable." << std::endl;
+                        exit(1);
+                    }
+                }
+                else if (VarName->mText == "fonction") {
+                    VarName = CheckerIdentifiant();
+
+                    if (VarName.has_value()) {
+                        if (std::find(InstructionsList.begin(), InstructionsList.end(), VarName->mText) != InstructionsList.end()) {
+                            std::cerr << "Le nom doit etre different des types, des instructions." << std::endl;
+                            exit(1);
+                        }
+
+                        if (fonction != std::nullopt && isArgument(fonction->FonctionName, VarName->mText)) {
+                            std::cerr << "Le nom de la variable ne peut pas etre le meme que celui d'un argument de la fonction : " << fonction->FonctionName << "." << std::endl;
+                            exit(1);
+                        }
+
+                        if (CheckerOperateur("-").has_value()) {
+                            if (CheckerOperateur(">").has_value()) {
+                                auto PossibleFonction = CheckerIdentifiant();
+                                if (PossibleFonction.has_value()) {
+                                    if (isFonction(PossibleFonction->mText)) {
+
+                                        FonctionDefinition f = mFonctions[PossibleFonction->mText];
+
+                                        if (VarType->mType != f.ReturnType.mType && VarType->mType != AUTO) {
+                                            std::cerr << "Vous devez utiliser le meme type que le type de retour de la fonction." << std::endl;
+                                            exit(1);
+                                        }
+
+                                        if (!f.HasReturn) {
+                                            std::cerr << "Vous devez utiliser une appellation classique." << std::endl;
+                                            exit(1);
+                                        }
+
+                                        if (!f.HasArgument && !CheckerOperateur(";").has_value()) {
+                                            std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
+                                            exit(1);
+                                        }
+
+                                        executeFonctionContent(f, PossibleFonction->mText);
+
+                                        VariableDefinition variable;
+                                        variable.VariableName = VarName->mText;
+                                        variable.VariableValue = f.ReturnValue;
+                                        variable.VariableType = Type(f.ReturnType.mName, f.ReturnType.mType);
+                                        variable.IsGlobal = false;
+                                        variable.InFonction = false;
+                                        variable.HasReturnValue = true;
+                                        if (fonction != std::nullopt) {
+                                            variable.InFonction = true;
+                                        }
+
+                                        mVariables[variable.VariableName] = variable;
+                                        return true;
+                                    } else {
+                                        std::cerr << "Cette fonction est inexistante." << std::endl;
+                                        exit(1);
+                                    }
+                                } else {
+                                    std::cerr << "Vous devez indiquer le nom de la fonction." << std::endl;
+                                    exit(1);
+                                }
+                            } else {
+                                std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur a la variable." << std::endl;
+                                exit(1);
+                            }
+                        } else {
+                            std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur a la variable." << std::endl;
+                            exit(1);
+                        }
                     }
                 }
                 else {
+
+                    if (std::find(InstructionsList.begin(), InstructionsList.end(), VarName->mText) != InstructionsList.end()) {
+                        std::cerr << "Le nom doit etre different des types, des instructions." << std::endl;
+                        exit(1);
+                    }
+
                     if (fonction != std::nullopt && isArgument(fonction->FonctionName, VarName->mText)) {
                         std::cerr << "Le nom de la variable ne peut pas etre le meme que celui d'un argument de la fonction : " << fonction->FonctionName << "." << std::endl;
-                        return false;
+                        exit(1);
                     }
 
                     if (CheckerOperateur("-").has_value()) {
@@ -415,6 +590,7 @@ namespace FPL {
                                         variable.VariableType = Type(VarType->mName, VarType->mType);
                                     }
                                     variable.IsGlobal = false;
+                                    variable.HasReturnValue = false;
                                     variable.InFonction = false;
                                     if (fonction.has_value() || fonction != std::nullopt) {
                                         variable.InFonction = true;
@@ -425,10 +601,10 @@ namespace FPL {
                                     variable.VariableValue = VarValue->StatementName;
 
                                     mVariables[variable.VariableName] = variable;
-
                                     return true;
                                 } else {
                                     std::cerr << "Merci de signifier la fin de la declaration de la variable avec ';'." << std::endl;
+                                    exit(1);
                                 }
                             } else if (CheckerIdentifiant().has_value()) {
                                 --mCurrentToken;
@@ -442,6 +618,7 @@ namespace FPL {
                                                 variable.VariableName = VarName->mText;
                                                 variable.VariableType = Type(VarType->mName, VarType->mType);
                                                 variable.IsGlobal = false;
+                                                variable.HasReturnValue = false;
                                                 variable.InFonction = false;
                                                 if (fonction.has_value() || fonction != std::nullopt) {
                                                     variable.InFonction = true;
@@ -452,12 +629,13 @@ namespace FPL {
                                                 return true;
                                             } else {
                                                 std::cerr << "Vous devez donner une valeur a la variable qui correspond au type." << std::endl;
-                                                return false;
+                                                exit(1);
                                             }
                                         } else if (fonction != std::nullopt && isArgument(fonction->FonctionName, PossibleVariable->mText)) {
                                             VariableDefinition variable;
                                             variable.VariableName = VarName->mText;
                                             variable.IsGlobal = false;
+                                            variable.HasReturnValue = false;
                                             variable.InFonction = false;
 
                                             if (fonction.has_value() || fonction != std::nullopt) {
@@ -468,7 +646,7 @@ namespace FPL {
                                                 variable.VariableType = Type(VarType->mName, VarType->mType);
                                             } else {
                                                 std::cerr << "Vous devez donner une valeur a la variable qui correspond au type." << std::endl;
-                                                return false;
+                                                exit(1);
                                             }
 
                                             if (VarType->mType == AUTO) {
@@ -483,20 +661,25 @@ namespace FPL {
                                         }
                                     } else {
                                         std::cerr << "Merci de signifier la fin de la déclaration de la variable avec ';'." << std::endl;
+                                        exit(1);
                                     }
                                 }
                             } else {
                                 std::cerr << "Vous devez donner une valeur a la variable qui correspond au type." << std::endl;
+                                exit(1);
                             }
                         } else {
                             std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur a la variable." << std::endl;
+                            exit(1);
                         }
                     } else {
                         std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur a la variable." << std::endl;
+                        exit(1);
                     }
                 }
             } else {
                 std::cerr << "Vous devez indiquer un nom a la variable." << std::endl;
+                exit(1);
             }
         }
         return false;
@@ -517,9 +700,11 @@ namespace FPL {
                                     return true;
                                 } else {
                                     std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
+                                    exit(1);
                                 }
                             } else {
                                 std::cerr << "Veuillez donner une valeur en rapport avec le type de la variable." << std::endl;
+                                exit(1);
                             }
                         } else {
                             auto PossibleVar = CheckerIdentifiant();
@@ -531,6 +716,7 @@ namespace FPL {
                                             return true;
                                         } else {
                                             std::cerr << "Le type de la variable n'est pas le même que celui de la variable que vous voulez modifier." << std::endl;
+                                            exit(1);
                                         }
                                     } else if (fonction != std::nullopt) {
                                         if (isArgument(fonction->FonctionName, PossibleVar->mText)) {
@@ -538,27 +724,35 @@ namespace FPL {
                                             return true;
                                         } else {
                                             std::cerr << "L'argument de la fonction ' " << fonction->FonctionName << " est inexistant." << std::endl;
+                                            exit(1);
                                         }
                                     } else {
                                         std::cerr << "La variable n'existe pas." << std::endl;
+                                        exit(1);
                                     }
                                 } else {
                                     std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
+                                    exit(1);
                                 }
                             }
                             std::cerr << "Veuillez preciser la nouvelle valeur de la variable." << std::endl;
+                            exit(1);
                         }
                     } else {
                         std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur a la variable." << std::endl;
+                        exit(1);
                     }
                 } else {
                     std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur a la variable." << std::endl;
+                    exit(1);
                 }
             } else {
                 std::cerr << "Cette variable n'existe pas." << std::endl;
+                exit(1);
             }
         } else {
             std::cerr << "Vous devez spécifier le nom de votre variable." << std::endl;
+            exit(1);
         }
         return false;
     }
@@ -588,7 +782,7 @@ namespace FPL {
                             std::cout << finalMsg;
                         } else{
                             std::cerr << "Ces operateurs sont utilises dans cette instruction pour introduire une variable, merci de cloturer l'insertion avec ']'." << std::endl;
-                            return false;
+                            exit(1);
                         }
                     } else if (isArgument(fonction->FonctionName, var->mText)) {
                         if (CheckerOperateur("]").has_value()) {
@@ -599,14 +793,12 @@ namespace FPL {
                             std::cout << finalMsg;
                         } else{
                             std::cerr << "Ces operateurs sont utilises dans cette instruction pour introduire une variable, merci de cloturer l'insertion avec ']'." << std::endl;
-                            return false;
+                            exit(1);
                         }
-                    } else {
-                        std::cerr << "La variable n'existe pas." << std::endl;
                     }
                 } else {
                     std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
-                    return false;
+                    exit(1);
                 }
 
                 if (CheckerOperateur(";").has_value()) {
@@ -631,7 +823,7 @@ namespace FPL {
                         }
                     }
                     std::cerr << "Vous devez specifier une argument d'une fonction ou une variable." << std::endl;
-                    return false;
+                    exit(1);
                 } else {
                     std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
                 }
@@ -658,7 +850,6 @@ namespace FPL {
             } else {
                 mCurrentToken = parseStart;
             }
-            return false;
         }
         return false;
     }

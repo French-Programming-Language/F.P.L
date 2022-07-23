@@ -47,6 +47,7 @@ namespace FPL {
         std::map<std::string, std::map<std::string, ArgumentDefinition>> mArguments;
         bool FonctionInstruction(auto parseStart);
         bool AppelerInstruction();
+        void executeFonctionContent(FonctionDefinition &fonction, std::string fonctionName);
         bool isFonction(std::string &name) const;
         bool isFonctionArgument(std::string &fonction, std::string &argument);
         bool isArgument(std::string& fonction, std::string &name) const;
@@ -59,5 +60,6 @@ namespace FPL {
         std::vector<Token>::iterator mCurrentToken;
         std::vector<Token>::iterator mEndToken;
         std::map<std::string, Type> mTypes;
+        std::vector<std::string> InstructionsList;
     };
 }
