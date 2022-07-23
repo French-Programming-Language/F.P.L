@@ -514,7 +514,6 @@ namespace FPL {
                                 auto PossibleFonction = CheckerIdentifiant();
                                 if (PossibleFonction.has_value()) {
                                     if (isFonction(PossibleFonction->mText)) {
-
                                         FonctionDefinition f = mFonctions[PossibleFonction->mText];
 
                                         if (VarType->mType != f.ReturnType.mType && VarType->mType != AUTO) {
@@ -544,9 +543,32 @@ namespace FPL {
                                         if (fonction != std::nullopt) {
                                             variable.InFonction = true;
                                         }
-
                                         mVariables[variable.VariableName] = variable;
                                         return true;
+                                    } else if (isVariable(PossibleFonction->mText)) {
+                                        VariableDefinition var = mVariables[PossibleFonction->mText];
+                                        if (var.HasReturnValue) {
+                                            if (CheckerOperateur(";").has_value()) {
+                                                VariableDefinition variable;
+                                                variable.VariableName = VarName->mText;
+                                                variable.VariableValue = var.VariableValue;
+                                                variable.VariableType = Type(var.VariableType.mName, var.VariableType.mType);
+                                                variable.IsGlobal = false;
+                                                variable.InFonction = false;
+                                                variable.HasReturnValue = true;
+                                                if (fonction != std::nullopt) {
+                                                    variable.InFonction = true;
+                                                }
+                                                mVariables[variable.VariableName] = variable;
+                                                return true;
+                                            } else {
+                                                std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
+                                                exit(1);
+                                            }
+                                        } else {
+                                            std::cerr << "La variable doit avoir une valeur de retour." << std::endl;
+                                            exit(1);
+                                        }
                                     } else {
                                         std::cerr << "Cette fonction est inexistante." << std::endl;
                                         exit(1);
@@ -868,7 +890,7 @@ namespace FPL {
                     continue;
                 }
 
-                std::cerr << "Identifier inconnu : " << mCurrentToken->mText << std::endl;
+                std::cerr << "Identifier inconnu : " << mCurrentToken->mText << " : " << mCurrentToken->mLineNumber << std::endl;
                 ++mCurrentToken;
             }
         }
