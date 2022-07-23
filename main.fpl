@@ -1,5 +1,7 @@
-definir n(entier a) {
-    envoyer "Yo j'ai eu" [a] "en math... mais toi tu as eu" 10 "roh !";
+definir n() {
+    envoyer "Yo j'ai eu en math mais toi tu as eu" 10 "roh !";
+    renvoyer 152;
 }
 
-appeler n : a 5;
+variable entier fonction retour -> n;
+envoyer retour;
