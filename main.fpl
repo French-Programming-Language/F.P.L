@@ -4,4 +4,5 @@ definir n() {
 }
 
 variable entier fonction retour -> n;
-envoyer retour;
+variable auto fonction r -> retour;
+envoyer r;
