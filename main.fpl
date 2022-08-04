@@ -1,17 +1,2 @@
-saisir decimal age -> "Veuillez donner votre age";
-envoyer age;
-variable entier saisir a -> "Veuillez donner votre age";
+variable entier a -> 10;
 envoyer a;
-
-definir n(entier a) {
-    saisir entier b -> a;
-    envoyer "yo";
-}
-
-appeler n : a 15;
-envoyer "salut";
-
-saisir texte msg;
-envoyer msg;
-variable texte saisir m;
-envoyer m;
