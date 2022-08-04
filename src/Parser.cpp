@@ -26,6 +26,39 @@ namespace FPL {
         };
     }
 
+    void Parser::ManageVariableName(std::optional<FonctionDefinition>& fonction, std::string name) {
+        if (isVariable(name)) {
+            std::cerr << "Veuillez choisir un autre nom pour votre variable." << std::endl;
+            exit(1);
+        }
+
+        if (std::find(InstructionsList.begin(), InstructionsList.end(), name) != InstructionsList.end()) {
+            std::cerr << "Le nom doit etre different des types, des instructions." << std::endl;
+            exit(1);
+        }
+
+        if (fonction != std::nullopt) {
+            if (isArgument(fonction->FonctionName, name)) {
+                std::cerr << "Le nom de la variable ne peut pas etre le meme que celui d'un argument de la fonction : " << fonction->FonctionName << "." << std::endl;
+                exit(1);
+            }
+        }
+    }
+
+    void Parser::DefineVariable(std::optional<FonctionDefinition>& fonction, std::string& VarName, Type& VarType, std::string& VarValue) {
+        VariableDefinition variable;
+        variable.VariableName = VarName;
+        variable.VariableType = Type(VarType.mName, VarType.mType);
+        variable.IsGlobal = false;
+        variable.HasReturnValue = false;
+        variable.InFonction = false;
+        if (fonction.has_value()) {
+            variable.InFonction = true;
+        }
+        variable.VariableValue = VarValue;
+        mVariables[variable.VariableName] = variable;
+    }
+
     bool Parser::AppelerInstruction() {
         auto PossibleFonctionName = CheckerIdentifiant();
         if (PossibleFonctionName.has_value()) {
@@ -260,122 +293,28 @@ namespace FPL {
         auto VarType = CheckerType();
         if (VarType.has_value()) {
             auto VarName = CheckerIdentifiant();
-
-            if (isVariable(VarName->mText)) {
-                std::cerr << "Veuillez choisir un autre nom pour votre variable." << std::endl;
-                exit(1);
-            }
-
             if (VarName.has_value()) {
                 if (VarName->mText == "saisir") {
                     VarName = CheckerIdentifiant();
-
-                    if (std::find(InstructionsList.begin(), InstructionsList.end(), VarName->mText) != InstructionsList.end()) {
-                        std::cerr << "Le nom doit etre different des types, des instructions." << std::endl;
-                        exit(1);
-                    }
-
                     if (VarName.has_value()) {
-                        if (fonction != std::nullopt) {
-                            if (isArgument(fonction->FonctionName, VarName->mText)) {
-                                std::cerr << "Le nom de la variable ne peut pas etre le meme que celui d'un argument de la fonction : " << fonction->FonctionName << "." << std::endl;
-                                exit(1);
-                            }
-                        }
+                        ManageVariableName(fonction, VarName->mText);
 
                         if (CheckerOperateur("-").has_value()) {
                             if (CheckerOperateur(">").has_value()) {
-                                auto VarValue = CheckerValue();
-
-                                if (VarValue->StatementType.mType == STRING) {
-                                    std::replace(VarValue->StatementName.begin(), VarValue->StatementName.end(), '"', ' ');
-                                }
-
-                                if (VarValue.has_value()) {
-                                    std::cout << VarValue->StatementName << std::endl;
-                                } else {
-                                    auto PossibleArgument = CheckerIdentifiant();
-                                    if (PossibleArgument.has_value() && fonction != std::nullopt) {
-                                        if (isArgument(fonction->FonctionName, PossibleArgument->mText)) {
-                                            std::cout << mArguments[fonction->FonctionName][PossibleArgument->mText].ArgValue << std::endl;
-                                        } else {
-                                            std::cerr << "L'argument " << PossibleArgument->mText <<" est inexistant ." << std::endl;
-                                            exit(1);
-                                        }
-                                    }
-                                }
-
-                                if (CheckerOperateur(";").has_value()) {
-                                    VariableDefinition variable;
-                                    variable.VariableName = VarName->mText;
-                                    variable.VariableType = Type(VarType->mName, VarType->mType);
-                                    variable.IsGlobal = false;
-                                    variable.HasReturnValue = false;
-                                    variable.InFonction = false;
-                                    if (fonction.has_value() || fonction != std::nullopt) {
-                                        variable.InFonction = true;
-                                    }
-
-                                    if (VarType->mType == INT) {
-                                        int v;
-                                        std::cin >> v;
-                                        variable.VariableValue = std::to_string(v);
-                                        mVariables[variable.VariableName] = variable;
-                                    } else if (VarType->mType == DOUBLE) {
-                                        double v;
-                                        std::cin >> v;
-                                        variable.VariableValue = std::to_string(v);
-                                        mVariables[variable.VariableName] = variable;
-                                    } else if (VarType->mType == STRING) {
-                                        std::string v;
-                                        std::cin >> v;
-                                        variable.VariableValue = v;
-                                        mVariables[variable.VariableName] = variable;
-                                    }
+                                if (executeInputs(fonction, VarName->mText, VarType.value(), "with")) {
                                     return true;
-                                } else {
-                                    std::cerr << "Merci de signifier la fin de la declaration de la variable avec ';'." << std::endl;
-                                    exit(1);
                                 }
+                                return false;
                             } else {
                                 std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur." << std::endl;
                                 exit(1);
                             }
                         } else {
-                            if (CheckerOperateur(";").has_value()) {
-                                VariableDefinition variable;
-                                variable.VariableName = VarName->mText;
-                                variable.VariableType = Type(VarType->mName, VarType->mType);
-                                variable.IsGlobal = false;
-                                variable.HasReturnValue = false;
-                                variable.InFonction = false;
-                                if (fonction.has_value() || fonction != std::nullopt) {
-                                    variable.InFonction = true;
-                                }
-
-                                if (VarType->mType == INT) {
-                                    int v;
-                                    std::cin >> v;
-                                    variable.VariableValue = std::to_string(v);
-
-                                    mVariables[variable.VariableName] = variable;
-                                } else if (VarType->mType == DOUBLE) {
-                                    double v;
-                                    std::cin >> v;
-                                    variable.VariableValue = std::to_string(v);
-
-                                    mVariables[variable.VariableName] = variable;
-                                } else if (VarType->mType == STRING) {
-                                    std::string v;
-                                    std::cin >> v;
-                                    variable.VariableValue = v;
-                                    mVariables[variable.VariableName] = variable;
-                                }
+                            if (executeInputs(fonction, VarName->mText, VarType.value(), "without")) {
                                 return true;
-                            } else {
-                                std::cerr << "Merci de signifier la fin de la declaration de la variable avec ';'." << std::endl;
-                                exit(1);
                             }
+                            std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur." << std::endl;
+                            exit(1);
                         }
                     } else {
                         std::cerr << "Vous devez indiquer un nom a la variable." << std::endl;
@@ -385,18 +324,7 @@ namespace FPL {
                 else if (VarName->mText == "globale") {
                     VarName = CheckerIdentifiant();
                     if (VarName.has_value()) {
-
-                        if (std::find(InstructionsList.begin(), InstructionsList.end(), VarName->mText) != InstructionsList.end()) {
-                            std::cerr << "Le nom doit etre different des types, des instructions." << std::endl;
-                            exit(1);
-                        }
-
-                        if (fonction != std::nullopt) {
-                            if (isArgument(fonction->FonctionName, VarName->mText)) {
-                                std::cerr << "Le nom de la variable ne peut pas etre le meme que celui d'un argument de la fonction : " << fonction->FonctionName << "." << std::endl;
-                                exit(1);
-                            }
-                        }
+                        ManageVariableName(fonction, VarName->mText);
 
                         if (CheckerOperateur("-").has_value()) {
                             if (CheckerOperateur(">").has_value()) {
@@ -497,17 +425,8 @@ namespace FPL {
                 }
                 else if (VarName->mText == "fonction") {
                     VarName = CheckerIdentifiant();
-
                     if (VarName.has_value()) {
-                        if (std::find(InstructionsList.begin(), InstructionsList.end(), VarName->mText) != InstructionsList.end()) {
-                            std::cerr << "Le nom doit etre different des types, des instructions." << std::endl;
-                            exit(1);
-                        }
-
-                        if (fonction != std::nullopt && isArgument(fonction->FonctionName, VarName->mText)) {
-                            std::cerr << "Le nom de la variable ne peut pas etre le meme que celui d'un argument de la fonction : " << fonction->FonctionName << "." << std::endl;
-                            exit(1);
-                        }
+                        ManageVariableName(fonction, VarName->mText);
 
                         if (CheckerOperateur("-").has_value()) {
                             if (CheckerOperateur(">").has_value()) {
@@ -588,16 +507,7 @@ namespace FPL {
                     }
                 }
                 else {
-
-                    if (std::find(InstructionsList.begin(), InstructionsList.end(), VarName->mText) != InstructionsList.end()) {
-                        std::cerr << "Le nom doit etre different des types, des instructions." << std::endl;
-                        exit(1);
-                    }
-
-                    if (fonction != std::nullopt && isArgument(fonction->FonctionName, VarName->mText)) {
-                        std::cerr << "Le nom de la variable ne peut pas etre le meme que celui d'un argument de la fonction : " << fonction->FonctionName << "." << std::endl;
-                        exit(1);
-                    }
+                    ManageVariableName(fonction, VarName->mText);
 
                     if (CheckerOperateur("-").has_value()) {
                         if (CheckerOperateur(">").has_value()) {
@@ -703,6 +613,97 @@ namespace FPL {
                 std::cerr << "Vous devez indiquer un nom a la variable." << std::endl;
                 exit(1);
             }
+        }
+        return false;
+    }
+
+    bool Parser::executeInputs(std::optional<FonctionDefinition>& fonction, std::string& VarName,  Type& VarType, std::string option) {
+        if (option == "with") {
+            auto VarValue = CheckerValue();
+
+            if (VarValue->StatementType.mType == STRING) {
+                std::replace(VarValue->StatementName.begin(), VarValue->StatementName.end(), '"', ' ');
+            }
+
+            if (VarValue.has_value()) {
+                std::cout << VarValue->StatementName << std::endl;
+            } else {
+                auto PossibleArgument = CheckerIdentifiant();
+                if (PossibleArgument.has_value() && fonction != std::nullopt) {
+                    if (isArgument(fonction->FonctionName, PossibleArgument->mText)) {
+                        std::cout << mArguments[fonction->FonctionName][PossibleArgument->mText].ArgValue << std::endl;
+                    } else {
+                        std::cerr << "L'argument " << PossibleArgument->mText <<" est inexistant ." << std::endl;
+                        exit(1);
+                    }
+                }
+            }
+        }
+
+        if (CheckerOperateur(";").has_value()) {
+            VariableDefinition variable;
+            variable.VariableName = VarName;
+            variable.VariableType = Type(VarType.mName, VarType.mType);
+            variable.IsGlobal = false;
+            variable.HasReturnValue = false;
+            variable.InFonction = false;
+            if (fonction.has_value()) {
+                variable.InFonction = true;
+            }
+
+            if (VarType.mType == INT) {
+                int v;
+                std::cin >> v;
+                variable.VariableValue = std::to_string(v);
+            } else if (VarType.mType == DOUBLE) {
+                double v;
+                std::cin >> v;
+                variable.VariableValue = std::to_string(v);
+            } else if (VarType.mType == STRING) {
+                std::string v;
+                std::cin >> v;
+                variable.VariableValue = v;
+            }
+            mVariables[variable.VariableName] = variable;
+            return true;
+        } else {
+            std::cerr << "Merci de signifier la fin de la declaration de la variable avec ';'." << std::endl;
+            exit(1);
+        }
+        return false;
+    }
+
+    bool Parser::SaisirInstruction(std::optional<FonctionDefinition>& fonction) {
+        auto VarType = CheckerType();
+
+        if (VarType.has_value()) {
+            auto VarName = CheckerIdentifiant();
+            if (VarName.has_value()) {
+                ManageVariableName(fonction, VarName->mText);
+
+                if (CheckerOperateur("-").has_value()) {
+                    if (CheckerOperateur(">").has_value()) {
+                        if (executeInputs(fonction, VarName->mText, VarType.value(), "with")) {
+                            return true;
+                        }
+                    } else {
+                        std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur." << std::endl;
+                        exit(1);
+                    }
+                } else {
+                    if (executeInputs(fonction, VarName->mText, VarType.value(), "without")) {
+                        return true;
+                    }
+                    std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur." << std::endl;
+                    exit(1);
+                }
+            } else {
+                std::cerr << "Veuillez indiquer le nom de la variable." << std::endl;
+                exit(1);
+            }
+        } else {
+            std::cerr << "Veuillez donner le type de votre variable." << std::endl;
+            exit(1);
         }
         return false;
     }
@@ -869,7 +870,11 @@ namespace FPL {
                 if (FonctionInstruction(parseStart)) {return true;} else {return false;}
             } else if (PeutEtreInstruction->mText == "appeler") {
                if (AppelerInstruction()) { return true; } else {return false;}
-            } else {
+            }
+            else if (PeutEtreInstruction->mText == "saisir") {
+                if (SaisirInstruction(fonction)) { return true; } else { return false; }
+            }
+            else {
                 mCurrentToken = parseStart;
             }
         }
