@@ -1,8 +1,17 @@
-definir n() {
-    envoyer "Yo j'ai eu en math mais toi tu as eu" 10 "roh !";
-    renvoyer 152;
+saisir decimal age -> "Veuillez donner votre age";
+envoyer age;
+variable entier saisir a -> "Veuillez donner votre age";
+envoyer a;
+
+definir n(entier a) {
+    saisir entier b -> a;
+    envoyer "yo";
 }
 
-variable entier fonction retour -> n;
-variable auto fonction r -> retour;
-envoyer r;
+appeler n : a 15;
+envoyer "salut";
+
+saisir texte msg;
+envoyer msg;
+variable texte saisir m;
+envoyer m;
