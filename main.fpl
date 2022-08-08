@@ -1,5 +1,5 @@
-variable entier a -> 10;
-variable auto b -> a;
-envoyer b;
-changer b -> 15;
-envoyer b;
+definir p(entier a) {
+    envoyer "cc";
+    renvoyer a;
+}
+variable entier fonction b -> p : 10;
