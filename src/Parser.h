@@ -41,7 +41,7 @@ namespace FPL {
         bool isVariable(std::string &name) const;
         bool executeInputs(std::optional<FonctionDefinition> &fonction, std::string& VarName, Type& VarType, std::string option);
         void ManageVariableName(std::optional<FonctionDefinition> &fonction, std::string name);
-        void DefineVariable(std::optional<FonctionDefinition> &fonction, std::string &VarName, Type &VarType, std::string &VarValue);
+        void DefineVariable(std::optional<FonctionDefinition>& fonction, std::string& VarName, Type& VarType, std::string& VarValue, std::optional<Statement>& ContentVarValue, bool isGlobal, bool HasReturnV);
         bool VariableInstruction(std::optional<FonctionDefinition>& fonction);
         bool ChangerInstruction(std::optional<FonctionDefinition>& fonction);
         bool SaisirInstruction(std::optional<FonctionDefinition>& fonction);
