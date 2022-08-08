@@ -169,7 +169,6 @@ namespace FPL {
                                         std::cerr << "Vous ne pouvez plus rajouter d'instruction ou autre apres l'instruction 'renvoyer'." << std::endl;
                                         exit(1);
                                     }
-
                                     break;
                                 } else {
                                     std::cerr << "Vous devez utiliser la ';' pour mettre fin a l'instruction." << std::endl;
@@ -573,7 +572,7 @@ namespace FPL {
         return false;
     }
 
-    bool Parser::executeInputs(std::optional<FonctionDefinition>& fonction, std::string& VarName,  Type& VarType, std::string option) {
+    bool Parser::executeInputs(std::optional<FonctionDefinition>& fonction, std::string& VarName,  Type& VarType, const std::string& option) {
         if (option == "with") {
             auto VarValue = CheckerValue();
 

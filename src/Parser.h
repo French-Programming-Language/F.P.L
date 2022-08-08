@@ -39,7 +39,7 @@ namespace FPL {
         // Variable :
         std::map<std::string, VariableDefinition> mVariables;
         bool isVariable(std::string &name) const;
-        bool executeInputs(std::optional<FonctionDefinition> &fonction, std::string& VarName, Type& VarType, std::string option);
+        bool executeInputs(std::optional<FonctionDefinition> &fonction, std::string& VarName, Type& VarType, const std::string& option);
         void ManageVariableName(std::optional<FonctionDefinition> &fonction, std::string name);
         void DefineVariable(std::optional<FonctionDefinition>& fonction, std::string& VarName, Type& VarType, std::string& VarValue, std::optional<Statement>& ContentVarValue, bool isGlobal, bool HasReturnV);
         bool VariableInstruction(std::optional<FonctionDefinition>& fonction);
