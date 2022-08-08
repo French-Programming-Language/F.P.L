@@ -1,2 +1,5 @@
 variable entier a -> 10;
-envoyer a;
+variable auto b -> a;
+envoyer b;
+changer b -> 15;
+envoyer b;
