@@ -1,7 +1,2 @@
-definir p() {
-    variable entier a -> 15;
-    renvoyer a;
-}
-
-variable entier fonction b -> p;
-envoyer b;
+fichier lire "msg.txt" content;
+fichier ecrire "msg.txt" -> "Yo !";
