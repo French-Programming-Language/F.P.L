@@ -71,6 +71,92 @@ namespace FPL {
         mVariables[variable.VariableName] = variable;
     }
 
+
+
+    bool Parser::FichierInstruction(std::optional<FonctionDefinition>& fonction) {
+        auto arg = CheckerIdentifiant();
+        if (arg.has_value()) {
+            auto fichierName = CheckerValue();
+
+            if (fichierName->StatementType.mType != STRING) {
+                std::cerr << "Le nom du fichier doit etre entre \"\"." << std::endl;
+                exit(1);
+            }
+
+            std::replace(fichierName->StatementName.begin(), fichierName->StatementName.end(), '"', ' ');
+            fichierName->StatementName.erase(std::remove_if(fichierName->StatementName.begin(), fichierName->StatementName.end(), ::isspace), fichierName->StatementName.end());
+
+            if (fichierName.has_value()) {
+                if (arg->mText == "ecrire") {
+                    std::ofstream file { fichierName->StatementName };
+                    if (!file) {
+                        std::cerr << "Donnez le nom correct du fichier : '" << fichierName->StatementName << "' ." << std::endl;
+                        exit(1);
+                    }
+                    if (CheckerOperateur("-").has_value()) {
+                        if (CheckerOperateur(">").has_value()) {
+                            auto valueInFile = CheckerValue();
+                            if (valueInFile.has_value()) {
+                                if (CheckerOperateur(";").has_value()) {
+                                    std::replace(valueInFile->StatementName.begin(), valueInFile->StatementName.end(), '"', ' ');
+                                    file << valueInFile->StatementName << std::endl;
+                                    return true;
+                                }
+                                std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
+                                exit(1);
+                            } else {
+                                std::cerr << "Veuillez donner une valeur qui va etre ecrite dans le fichier '" << fichierName->StatementName << "'." << std::endl;
+                                exit(1);
+                            }
+                        } else {
+                            std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur." << std::endl;
+                            exit(1);
+                        }
+                    } else {
+                        std::cerr << "Vous devez utiliser les symboles '->' pour donner une valeur." << std::endl;
+                        exit(1);
+                    }
+                } else if (arg->mText == "lire") {
+                    std::ifstream file { fichierName->StatementName };
+                    if (!file) {
+                        std::cerr << "Donnez le nom correct du fichier : '" << fichierName->StatementName << "' ." << std::endl;
+                        exit(1);
+                    }
+                    auto varName = CheckerIdentifiant();
+                    if (varName.has_value()) {
+                        if (CheckerOperateur(";").has_value()) {
+                            std::string f_content((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
+                            VariableDefinition variable;
+                            variable.VariableName = varName->mText;
+                            variable.VariableType = Type("texte", STRING);
+                            variable.HasReturnValue = false;
+                            variable.IsGlobal = false;
+                            variable.InFonction = false;
+                            if (fonction.has_value()) {
+                                variable.InFonction = true;
+                            }
+                            variable.VariableValue = f_content;
+                            mVariables[variable.VariableName] = variable;
+                            return true;
+                        }
+                        std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
+                        exit(1);
+                    } else {
+                        std::cerr << "Veuillez donner un nom pour la variable." << std::endl;
+                        exit(1);
+                    }
+                } else {
+                    std::cerr << "Vous ne pouvez que ecrire ou lire le contenu d'un fichier en F.P.L." << std::endl;
+                    exit(1);
+                }
+            } else {
+                std::cerr << "Vous devez preciser le nom du fichier auquel vous voulez executer une instruction." << std::endl;
+                exit(1);
+            }
+        }
+        return false;
+    }
+
     bool Parser::AppelerInstruction() {
         auto PossibleFonctionName = CheckerIdentifiant();
         if (PossibleFonctionName.has_value()) {
@@ -893,6 +979,8 @@ namespace FPL {
                if (AppelerInstruction()) { return true; } else {return false;}
             } else if (PeutEtreInstruction->mText == "saisir") {
                 if (SaisirInstruction(fonction)) { return true; } else { return false; }
+            } else if (PeutEtreInstruction->mText == "fichier") {
+                if (FichierInstruction(fonction)) {return true;} else {return false;}
             }
             else {
                 mCurrentToken = parseStart;
