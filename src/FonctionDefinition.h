@@ -26,6 +26,8 @@ namespace FPL {
         bool HasReturn = false;
         std::string ReturnValue;
         Type ReturnType;
+        bool ReturnIsIdentfiant = false;
+        std::string ReturnIdentifantValue;
 
         [[maybe_unused]] void FDebugPrint() const;
     };
