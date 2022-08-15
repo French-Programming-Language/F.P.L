@@ -164,6 +164,7 @@ namespace FPL {
                                     fonction.HasReturn = true;
                                     fonction.ReturnValue = v->StatementName;
                                     fonction.ReturnType = v->StatementType;
+                                    fonction.ReturnIsIdentfiant = false;
 
                                     if (CheckerIdentifiant().has_value() || CheckerValue().has_value() || CheckerType().has_value()) {
                                         std::cerr << "Vous ne pouvez plus rajouter d'instruction ou autre apres l'instruction 'renvoyer'." << std::endl;
@@ -175,6 +176,24 @@ namespace FPL {
                                     exit(1);
                                 }
                             } else {
+                                auto va = CheckerIdentifiant();
+                                if (va.has_value()) {
+                                    if (CheckerOperateur(";").has_value()) {
+                                        fonction.HasReturn = true;
+                                        fonction.ReturnIsIdentfiant = true;
+                                        fonction.ReturnIdentifantValue = va->mText;
+
+                                        if (CheckerIdentifiant().has_value() || CheckerValue().has_value() || CheckerType().has_value()) {
+                                            std::cerr << "Vous ne pouvez plus rajouter d'instruction ou autre apres l'instruction 'renvoyer'." << std::endl;
+                                            exit(1);
+                                        }
+                                        break;
+                                    } else {
+                                        std::cerr << "Vous devez utiliser la ';' pour mettre fin a l'instruction." << std::endl;
+                                        exit(1);
+                                    }
+                                }
+
                                 std::cerr << "Veuillez indiquer la valeur de retour de la fonction '" << fonction.FonctionName << "'." << std::endl;
                                 exit(1);
                             }
@@ -289,7 +308,7 @@ namespace FPL {
 
             std::vector<std::string> toErase;
             for(auto const &var: mVariables) {
-                if(var.second.InFonction && !var.second.IsGlobal) {
+                if(var.second.InFonction && !var.second.IsGlobal && !fonction.ReturnIsIdentfiant && fonction.ReturnIdentifantValue != var.second.VariableName) {
                     toErase.push_back(var.first);
                 }
             }
@@ -423,7 +442,7 @@ namespace FPL {
                                     if (isFonction(PossibleFonction->mText)) {
                                         FonctionDefinition f = mFonctions[PossibleFonction->mText];
 
-                                        if (VarType->mType != f.ReturnType.mType && VarType->mType != AUTO) {
+                                        if (VarType->mType != f.ReturnType.mType && VarType->mType != AUTO && !f.ReturnIsIdentfiant) {
                                             std::cerr << "Vous devez utiliser le meme type que le type de retour de la fonction." << std::endl;
                                             exit(1);
                                         }
@@ -440,7 +459,63 @@ namespace FPL {
 
                                         executeFonctionContent(f, PossibleFonction->mText);
 
-                                        DefineVariable(fonction, VarName->mText, VarType.value(), f.ReturnValue, (std::optional<Statement> &) std::nullopt, false, true);
+                                        if (!f.ReturnIsIdentfiant) {
+                                            DefineVariable(fonction, VarName->mText, VarType.value(), f.ReturnValue, (std::optional<Statement> &) std::nullopt, false, true);
+                                        } else {
+                                            if (isVariable(f.ReturnIdentifantValue)) {
+                                                VariableDefinition var = mVariables[f.ReturnIdentifantValue];
+
+                                                if (var.VariableType.mType != VarType->mType && VarType->mType != AUTO) {
+                                                    std::cerr << "Vous devez donner une valeur a la variable qui correspond au type." << std::endl;
+                                                    exit(1);
+                                                }
+
+                                                VariableDefinition variable;
+                                                variable.VariableName = VarName->mText;
+                                                if (VarType->mType == AUTO) {
+                                                    variable.VariableType = var.VariableType;
+                                                } else {
+                                                    variable.VariableType = Type(VarType->mName, VarType->mType);
+                                                }
+                                                variable.IsGlobal = false;
+                                                variable.HasReturnValue = true;
+                                                variable.InFonction = false;
+                                                if (fonction.has_value()) {
+                                                    variable.InFonction = true;
+                                                }
+                                                variable.VariableValue = var.VariableValue;
+                                                mVariables[variable.VariableName] = variable;
+                                                auto it = mVariables.find(f.ReturnIdentifantValue);
+                                                mVariables.erase(it);
+                                                return true;
+                                            } else if (isArgument(f.FonctionName, f.ReturnIdentifantValue)) {
+                                                ArgumentDefinition arg = mArguments[f.FonctionName][f.ReturnIdentifantValue];
+
+                                                if (arg.ArgType.mType != VarType->mType && VarType->mType != AUTO) {
+                                                    std::cerr << "Vous devez donner une valeur a la variable qui correspond au type." << std::endl;
+                                                    exit(1);
+                                                }
+
+                                                VariableDefinition variable;
+                                                variable.VariableName = VarName->mText;
+                                                if (VarType->mType == AUTO) {
+                                                    variable.VariableType = arg.ArgType;
+                                                } else {
+                                                    variable.VariableType = Type(VarType->mName, VarType->mType);
+                                                }
+                                                variable.IsGlobal = false;
+                                                variable.HasReturnValue = true;
+                                                variable.InFonction = false;
+                                                if (fonction.has_value()) {
+                                                    variable.InFonction = true;
+                                                }
+                                                variable.VariableValue = arg.ArgValue ;
+                                                mVariables[variable.VariableName] = variable;
+                                                return true;
+                                            }
+                                            std::cerr << "Votre retour de la fonction " << f.FonctionName << " n'est pas une variable ou un argument." << std::endl;
+                                            exit(1);
+                                        }
                                         return true;
                                     } else if (isVariable(PossibleFonction->mText)) {
                                         VariableDefinition var = mVariables[PossibleFonction->mText];
@@ -791,7 +866,7 @@ namespace FPL {
                             return true;
                         }
                     }
-                    std::cerr << "Vous devez specifier une argument d'une fonction ou une variable." << std::endl;
+                    std::cerr << "Vous devez specifier un argument d'une fonction ou une variable." << std::endl;
                     exit(1);
                 } else {
                     std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
