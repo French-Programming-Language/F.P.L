@@ -901,8 +901,6 @@ namespace FPL {
         return false;
     }
 
-
-
     void Parser::parse(std::vector<Token> &tokens, std::optional<FonctionDefinition>& fonction) {
         mEndToken = tokens.end();
         mCurrentToken = tokens.begin();
