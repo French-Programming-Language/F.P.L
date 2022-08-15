@@ -9,6 +9,7 @@
 #include <map>
 #include <functional>
 #include <algorithm>
+#include <fstream>
 
 #include "TokenBuilding.h"
 #include "TypeManager.h"
@@ -57,6 +58,10 @@ namespace FPL {
         bool isArgument(std::string& fonction, std::string &name) const;
         std::optional<FonctionDefinition> getFonction(std::string &fonction);
         std::optional<ArgumentDefinition> getArgument(std::string &fonction, std::string &name);
+
+        // Fichiers :
+
+        bool FichierInstruction(std::optional<FonctionDefinition>& fonction);
 
 
         // Utils :
