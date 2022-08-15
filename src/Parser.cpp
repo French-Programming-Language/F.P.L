@@ -88,18 +88,19 @@ namespace FPL {
 
             if (fichierName.has_value()) {
                 if (arg->mText == "ecrire") {
-                    std::ofstream file { fichierName->StatementName };
-                    if (!file) {
-                        std::cerr << "Donnez le nom correct du fichier : '" << fichierName->StatementName << "'." << std::endl;
-                        exit(1);
-                    }
                     if (CheckerOperateur("-").has_value()) {
                         if (CheckerOperateur(">").has_value()) {
                             auto valueInFile = CheckerValue();
                             if (valueInFile.has_value()) {
                                 if (CheckerOperateur(";").has_value()) {
+                                    std::ofstream file { fichierName->StatementName };
+                                    /*if (!file) {
+                                        std::cerr << "Donnez le nom correct du fichier : '" << fichierName->StatementName << "'." << std::endl;
+                                        exit(1);
+                                    }*/
                                     std::replace(valueInFile->StatementName.begin(), valueInFile->StatementName.end(), '"', ' ');
                                     file << valueInFile->StatementName << std::endl;
+                                    file.close();
                                     return true;
                                 }
                                 std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
@@ -117,14 +118,14 @@ namespace FPL {
                         exit(1);
                     }
                 } else if (arg->mText == "lire") {
-                    std::ifstream file { fichierName->StatementName };
-                    if (!file) {
-                        std::cerr << "Donnez le nom correct du fichier : '" << fichierName->StatementName << "' ." << std::endl;
-                        exit(1);
-                    }
                     auto varName = CheckerIdentifiant();
                     if (varName.has_value()) {
                         if (CheckerOperateur(";").has_value()) {
+                            std::ifstream file { fichierName->StatementName };
+                            if (!file) {
+                                std::cerr << "Donnez le nom correct du fichier : '" << fichierName->StatementName << "'." << std::endl;
+                                exit(1);
+                            }
                             std::string f_content((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
                             VariableDefinition variable;
                             variable.VariableName = varName->mText;
@@ -137,6 +138,7 @@ namespace FPL {
                             }
                             variable.VariableValue = f_content;
                             mVariables[variable.VariableName] = variable;
+                            file.close();
                             return true;
                         }
                         std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
