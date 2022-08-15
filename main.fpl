@@ -1,2 +1,3 @@
+fichier ecrire "msg.txt" -> "Yo";
 fichier lire "msg.txt" content;
-fichier ecrire "msg.txt" -> "Yo !";
+envoyer content;
