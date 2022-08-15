@@ -90,7 +90,7 @@ namespace FPL {
                 if (arg->mText == "ecrire") {
                     std::ofstream file { fichierName->StatementName };
                     if (!file) {
-                        std::cerr << "Donnez le nom correct du fichier : '" << fichierName->StatementName << "' ." << std::endl;
+                        std::cerr << "Donnez le nom correct du fichier : '" << fichierName->StatementName << "'." << std::endl;
                         exit(1);
                     }
                     if (CheckerOperateur("-").has_value()) {
