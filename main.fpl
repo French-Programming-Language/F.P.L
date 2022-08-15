@@ -1,5 +1,7 @@
-definir p(entier a) {
-    envoyer "cc";
+definir p() {
+    variable entier a -> 15;
     renvoyer a;
 }
-variable entier fonction b -> p : 10;
+
+variable entier fonction b -> p;
+envoyer b;
