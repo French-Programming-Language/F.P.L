@@ -63,6 +63,9 @@ namespace FPL {
 
         bool FichierInstruction(std::optional<FonctionDefinition>& fonction);
 
+        // Imports :
+        bool ImportInstruction(std::optional<FonctionDefinition>& fonction);
+
 
         // Utils :
         bool ManagerInstruction(std::optional<FonctionDefinition>& fonction);

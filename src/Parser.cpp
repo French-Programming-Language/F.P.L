@@ -73,6 +73,42 @@ namespace FPL {
 
 
 
+
+
+    bool Parser::ImportInstruction(std::optional<FonctionDefinition>& fonction) {
+        auto fichierName = CheckerValue();
+        if (fichierName.has_value()) {
+            if (fonction.has_value()) {
+                std::cerr << "Vous ne pouvez pas importer un fichier F.P.L dans une fonction." << std::endl;
+                exit(1);
+            }
+
+            if (CheckerOperateur(";").has_value()) {
+                std::replace(fichierName->StatementName.begin(), fichierName->StatementName.end(), '"', ' ');
+                fichierName->StatementName.erase(std::remove_if(fichierName->StatementName.begin(), fichierName->StatementName.end(), ::isspace), fichierName->StatementName.end());
+
+                std::ifstream file { fichierName->StatementName };
+                if (!file) {
+                    std::cerr << "Donnez le nom correct du fichier : '" << fichierName->StatementName << "'." << std::endl;
+                    exit(1);
+                }
+                std::string f_content((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
+                TokenBuilding t;
+                std::vector<Token> tokens = t.parseToken(f_content);
+
+                auto FCurrToken = tokens.begin();
+                auto oldCurrentToken = mCurrentToken;
+                std::optional<FonctionDefinition> f = fonction;
+                parse(tokens, f);
+                mCurrentToken = oldCurrentToken;
+                return true;
+            }
+            std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
+            exit(1);
+        }
+        return false;
+    }
+
     bool Parser::FichierInstruction(std::optional<FonctionDefinition>& fonction) {
         auto arg = CheckerIdentifiant();
         if (arg.has_value()) {
@@ -94,10 +130,6 @@ namespace FPL {
                             if (valueInFile.has_value()) {
                                 if (CheckerOperateur(";").has_value()) {
                                     std::ofstream file { fichierName->StatementName };
-                                    /*if (!file) {
-                                        std::cerr << "Donnez le nom correct du fichier : '" << fichierName->StatementName << "'." << std::endl;
-                                        exit(1);
-                                    }*/
                                     std::replace(valueInFile->StatementName.begin(), valueInFile->StatementName.end(), '"', ' ');
                                     file << valueInFile->StatementName << std::endl;
                                     file.close();
@@ -983,6 +1015,8 @@ namespace FPL {
                 if (SaisirInstruction(fonction)) { return true; } else { return false; }
             } else if (PeutEtreInstruction->mText == "fichier") {
                 if (FichierInstruction(fonction)) {return true;} else {return false;}
+            } else if (PeutEtreInstruction->mText == "importer") {
+                if (ImportInstruction(fonction)) { return true; } else { return false; }
             }
             else {
                 mCurrentToken = parseStart;
@@ -999,7 +1033,7 @@ namespace FPL {
             if (ManagerInstruction(fonction)) {
 
             } else {
-                if (mCurrentToken->mText.empty() || mCurrentToken->mType == ESPACEVIDE ) {
+                if (mCurrentToken->mText.empty() || mCurrentToken->mType == ESPACEVIDE || mCurrentToken->mText == "" || mCurrentToken->mText == " ") {
                     continue;
                 }
 
