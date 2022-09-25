@@ -4,11 +4,12 @@
 #include <vector>
 #include <string>
 #include <string_view>
+#include <sstream>
 #include <stdexcept>
+#include <algorithm>
 #include <optional>
 #include <map>
 #include <functional>
-#include <algorithm>
 #include <fstream>
 
 #include "TokenBuilding.h"
@@ -40,12 +41,16 @@ namespace FPL {
         // Variable :
         std::map<std::string, VariableDefinition> mVariables;
         bool isVariable(std::string &name) const;
-        bool executeInputs(std::optional<FonctionDefinition> &fonction, std::string& VarName, Type& VarType, const std::string& option);
+
         void ManageVariableName(std::optional<FonctionDefinition> &fonction, std::string name);
         void DefineVariable(std::optional<FonctionDefinition>& fonction, std::string& VarName, Type& VarType, std::string& VarValue, std::optional<Statement>& ContentVarValue, bool isGlobal, bool HasReturnV);
         bool VariableInstruction(std::optional<FonctionDefinition>& fonction);
         bool ChangerInstruction(std::optional<FonctionDefinition>& fonction);
+        bool ConversionInstruction(std::optional<FonctionDefinition>& fonction);
+
+        // Inputs:
         bool SaisirInstruction(std::optional<FonctionDefinition>& fonction);
+        bool executeInputs(std::optional<FonctionDefinition> &fonction, std::string& VarName, Type& VarType, const std::string& option);
 
         // Fonctions :
         std::map<std::string, FonctionDefinition> mFonctions;
@@ -60,12 +65,10 @@ namespace FPL {
         std::optional<ArgumentDefinition> getArgument(std::string &fonction, std::string &name);
 
         // Fichiers :
-
         bool FichierInstruction(std::optional<FonctionDefinition>& fonction);
 
         // Imports :
         bool ImportInstruction(std::optional<FonctionDefinition>& fonction);
-
 
         // Utils :
         bool ManagerInstruction(std::optional<FonctionDefinition>& fonction);

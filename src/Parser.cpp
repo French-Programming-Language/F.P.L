@@ -2,7 +2,7 @@
 
 namespace FPL {
     Parser::Parser() {
-        mTypes["vide"] = Type("vide", VOID);
+        mTypes["vide"] = Type("vide", VIDE);
         mTypes["entier"] = Type("entier", INT);
         mTypes["decimal"] = Type("decimal", DOUBLE);
         mTypes["texte"] = Type("texte", STRING);
@@ -22,7 +22,9 @@ namespace FPL {
                 "decimal",
                 "texte",
                 "vide",
-                "auto"
+                "auto",
+                "importer",
+                "requete"
         };
     }
 
@@ -70,10 +72,6 @@ namespace FPL {
         variable.VariableValue = VarValue;
         mVariables[variable.VariableName] = variable;
     }
-
-
-
-
 
     bool Parser::ImportInstruction(std::optional<FonctionDefinition>& fonction) {
         auto fichierName = CheckerValue();
@@ -236,7 +234,7 @@ namespace FPL {
                 while (!CheckerOperateur(")").has_value()) {
                     auto type = CheckerType();
 
-                    if (type->mType == VOID) { // Si aucun paramètre ou l'utilisateur a utilisé l'argument 'vide' ou juste fermer.
+                    if (type->mType == VIDE) { // Si aucun paramètre ou l'utilisateur a utilisé l'argument 'vide' ou juste fermer.
                         if (CheckerOperateur(")").has_value()) {
                             break;
                         } else {
@@ -849,6 +847,57 @@ namespace FPL {
         return false;
     }
 
+    bool Parser::ConversionInstruction(std::optional<FonctionDefinition>& fonction) {
+        auto VarName = CheckerIdentifiant();
+        if (VarName.has_value()) {
+            if (isVariable(VarName->mText)) {
+                auto var = mVariables[VarName->mText];
+                auto NewType = CheckerType();
+                if (NewType.has_value()) {
+                    if (CheckerOperateur(";").has_value()) {
+                        if (NewType->mType == INT && var.VariableType.mType == STRING) {
+                            try {
+                                int v = std::stoi(var.VariableValue);
+                                var.VariableValue = v;
+                                var.VariableType = Type("entier", INT);
+                            }
+                            catch (std::invalid_argument const& ex) {
+                                std::cout << "Ca ne peut pas devenir une valeur de type entier !" << "Erreur final : " << ex.what() << std::endl;
+                            }
+                            return true;
+                        } else if (NewType->mType == DOUBLE && var.VariableType.mType == STRING) {
+                            try {
+                                int v = std::stod(var.VariableValue);
+                                var.VariableValue = v;
+                                var.VariableType = Type("decimal", DOUBLE);
+                            }
+                            catch (std::invalid_argument const& ex) {
+                                std::cout << "Ca ne peut pas devenir une valeur de type entier !" << "Erreur final : " << ex.what() << std::endl;
+                            }
+                            return true;
+                        } else {
+                            std::cerr << "La valeur de la variable ne permet une conversion." << std::endl;
+                            exit(1);
+                        }
+                    } else {
+                        std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
+                        exit(1);
+                    }
+                } else {
+                    std::cerr << "Vous devez specifier le nouveau type de votre variable." << std::endl;
+                    exit(1);
+                }
+            } else {
+                std::cerr << "La variable est inexistante." << std::endl;
+                exit(1);
+            }
+        } else {
+            std::cerr << "Vous devez specifier le nom de votre variable." << std::endl;
+            exit(1);
+        }
+        return false;
+    }
+
     bool Parser::ChangerInstruction(std::optional<FonctionDefinition>& fonction) {
         auto VarName = CheckerIdentifiant();
         if (VarName.has_value()) {
@@ -915,7 +964,7 @@ namespace FPL {
                 exit(1);
             }
         } else {
-            std::cerr << "Vous devez spécifier le nom de votre variable." << std::endl;
+            std::cerr << "Vous devez specifier le nom de votre variable." << std::endl;
             exit(1);
         }
         return false;
@@ -998,8 +1047,8 @@ namespace FPL {
     }
 
     bool Parser::ManagerInstruction(std::optional<FonctionDefinition>& fonction) {
-        auto parseStart = mCurrentToken; // std::vector<Token>::iterator
-        auto PeutEtreInstruction = CheckerIdentifiant();
+        auto const parseStart = mCurrentToken; // std::vector<Token>::iterator
+        auto const PeutEtreInstruction = CheckerIdentifiant();
         if (PeutEtreInstruction.has_value()) {
             if (PeutEtreInstruction->mText == "envoyer") {
                 if (PrintInstruction(parseStart, fonction)) { return true; } else { return false; }
@@ -1010,13 +1059,15 @@ namespace FPL {
             } else if (PeutEtreInstruction->mText == "definir") {
                 if (FonctionInstruction(parseStart)) {return true;} else {return false;}
             } else if (PeutEtreInstruction->mText == "appeler") {
-               if (AppelerInstruction()) { return true; } else {return false;}
+               if (AppelerInstruction()) { return true; } else { return false; }
             } else if (PeutEtreInstruction->mText == "saisir") {
                 if (SaisirInstruction(fonction)) { return true; } else { return false; }
             } else if (PeutEtreInstruction->mText == "fichier") {
-                if (FichierInstruction(fonction)) {return true;} else {return false;}
+                if (FichierInstruction(fonction)) {return true;} else { return false; }
             } else if (PeutEtreInstruction->mText == "importer") {
                 if (ImportInstruction(fonction)) { return true; } else { return false; }
+            } else if (PeutEtreInstruction->mText == "convertir") {
+                if (ConversionInstruction(fonction)) { return true; } else { return false; }
             }
             else {
                 mCurrentToken = parseStart;
