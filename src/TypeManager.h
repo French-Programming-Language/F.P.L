@@ -4,7 +4,7 @@
 
 namespace FPL {
     enum BUILTIN_TYPE {
-        VOID,
+        VIDE,
         INT,
         DOUBLE,
         STRING,
@@ -14,7 +14,7 @@ namespace FPL {
 
     class Type {
     public:
-        explicit Type(const std::string &name = "", const enum BUILTIN_TYPE type = VOID) : mName(name), mType(type){};
+        explicit Type(const std::string &name = "", const enum BUILTIN_TYPE type = VIDE) : mName(name), mType(type){};
 
         std::string mName;
         enum BUILTIN_TYPE mType;
