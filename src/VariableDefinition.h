@@ -27,7 +27,7 @@ namespace FPL {
         Statement(StatementKind kind, std::string name, Type type);
 
         std::string StatementName;
-        Type StatementType{Type("void", VOID)};
+        Type StatementType{Type("void", VIDE)};
         StatementKind kind{};
     };
 
