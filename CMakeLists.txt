@@ -16,5 +16,4 @@ add_executable(French_Programming_Language
         src/TypeManager.h
         src/VariableDefinition.cpp
         src/VariableDefinition.h
-        src/modules/http/httplib.h
         main.cpp)
