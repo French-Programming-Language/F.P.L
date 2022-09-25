@@ -1,3 +1,5 @@
-importer "fichier.fpl";
+variable texte a -> "5";
+convertir a entier;
 
-envoyer "Salut";
+variable texte b -> "5.25";
+convertir b decimal;
