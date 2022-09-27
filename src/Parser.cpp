@@ -25,6 +25,7 @@ namespace FPL {
                 "auto",
                 "importer",
                 "requete"
+                "convertir"
         };
     }
 
@@ -854,6 +855,12 @@ namespace FPL {
                 auto var = mVariables[VarName->mText];
                 auto NewType = CheckerType();
                 if (NewType.has_value()) {
+
+                    if (NewType->mType == AUTO) {
+                        std::cerr << "Le nouveau type de la variable ne peut pas etre \"auto\"." << std::endl;
+                        exit(1);
+                    }
+
                     if (CheckerOperateur(";").has_value()) {
                         if (NewType->mType == INT && var.VariableType.mType == STRING) {
                             try {
