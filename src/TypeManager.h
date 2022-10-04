@@ -8,6 +8,7 @@ namespace FPL {
         INT,
         DOUBLE,
         STRING,
+        BOOL,
         AUTO
         // STRUCT -> pour l'oo
     };
