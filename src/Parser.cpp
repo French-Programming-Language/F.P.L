@@ -499,6 +499,7 @@ namespace FPL {
                                                     variable.HasReturnValue = false;
                                                     variable.InFonction = false;
                                                     variable.VariableType = Type("bool", BOOL);
+                                                    variable.VariableValue = name->mText;
 
                                                     if (fonction.has_value() || fonction != std::nullopt) {
                                                         variable.InFonction = true;
@@ -754,6 +755,7 @@ namespace FPL {
                                                 variable.HasReturnValue = false;
                                                 variable.InFonction = false;
                                                 variable.VariableType = Type("bool", BOOL);
+                                                variable.VariableValue = PossibleVariable->mText;
 
                                                 if (fonction.has_value() || fonction != std::nullopt) {
                                                     variable.InFonction = true;
