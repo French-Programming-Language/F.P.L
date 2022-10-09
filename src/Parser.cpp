@@ -855,7 +855,7 @@ namespace FPL {
                                             return true;
                                         }
                                     } else {
-                                        std::cerr << "Merci de signifier la fin de la déclaration de la variable avec ';'." << std::endl;
+                                        std::cerr << "Merci de signifier la fin de la declaration de la variable avec ';'." << std::endl;
                                         exit(1);
                                     }
                                 }
