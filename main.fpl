@@ -1,5 +1,5 @@
-variable texte a -> "5";
-convertir a entier;
+variable bool a -> vrai;
+envoyer a;
 
-variable texte b -> "5.25";
-convertir b decimal;
+variable bool globale b -> faux;
+envoyer b;
