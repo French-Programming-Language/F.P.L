@@ -7,7 +7,7 @@ namespace FPL {
         mTypes["decimal"] = Type("decimal", DOUBLE);
         mTypes["texte"] = Type("texte", STRING);
         mTypes["auto"] = Type("auto", AUTO);
-        mTypes["bool"] = Type("bool", BOOL); // Deux façon d'avoir le type bool.
+        mTypes["bool"] = Type("bool", BOOL); // Deux façons d'avoir le type bool.
         mTypes["boolean"] = Type("boolean", BOOL);
 
         InstructionsList = {
@@ -26,8 +26,10 @@ namespace FPL {
                 "vide",
                 "auto",
                 "importer",
-                "requete"
-                "convertir"
+                "requete",
+                "convertir",
+                "bool",
+                "booleen"
         };
     }
 
@@ -139,7 +141,7 @@ namespace FPL {
                                 std::cerr << "Vous devez mettre le symbole ';' pour mettre fin a l'instruction." << std::endl;
                                 exit(1);
                             } else {
-                                std::cerr << "Veuillez donner une valeur qui va etre ecrite dans le fichier '" << fichierName->StatementName << "'." << std::endl;
+                                std::cerr << "Veuillez donner une valeur qui va etre mis dans le fichier '" << fichierName->StatementName << "'." << std::endl;
                                 exit(1);
                             }
                         } else {
@@ -741,6 +743,61 @@ namespace FPL {
                                 --mCurrentToken;
                                 auto PossibleVariable = CheckerIdentifiant();
                                 if (PossibleVariable.has_value()) {
+
+                                    if (VarType->mType == BOOL) {
+
+                                        if (CheckerOperateur(";").has_value()) {
+                                            if (PossibleVariable->mText == "vrai" || PossibleVariable->mText == "faux") {
+                                                VariableDefinition variable;
+                                                variable.VariableName = VarName->mText;
+                                                variable.IsGlobal = true;
+                                                variable.HasReturnValue = false;
+                                                variable.InFonction = false;
+                                                variable.VariableType = Type("bool", BOOL);
+
+                                                if (fonction.has_value() || fonction != std::nullopt) {
+                                                    variable.InFonction = true;
+
+                                                    if (isArgument(fonction->FonctionName, PossibleVariable->mText)) {
+                                                        variable.VariableValue = mArguments[fonction->FonctionName][PossibleVariable->mText].ArgValue;
+
+                                                        if (VarType->mType == AUTO) {
+                                                            variable.VariableType = Type(
+                                                                    mArguments[fonction->FonctionName][PossibleVariable->mText].ArgType.mName,
+                                                                    mArguments[fonction->FonctionName][PossibleVariable->mText].ArgType.mType);
+                                                        } else if (VarType->mType != AUTO) {
+                                                            if (VarType->mType !=
+                                                                mArguments[fonction->FonctionName][PossibleVariable->mText].ArgType.mType) {
+                                                                std::cerr
+                                                                        << "Vous devez donner une valeur a la variable qui correspond au type."
+                                                                        << std::endl;
+                                                                exit(1);
+                                                            }
+                                                        }
+                                                    }
+                                                } else if (isVariable(PossibleVariable->mText)) {
+                                                    variable.VariableValue = mVariables[PossibleVariable->mText].VariableValue;
+
+                                                    if (VarType->mType == AUTO) {
+                                                        variable.VariableType = Type(mVariables[PossibleVariable->mText].VariableType.mName,
+                                                                                     mVariables[PossibleVariable->mText].VariableType.mType);
+                                                    } else if (VarType->mType != AUTO) {
+                                                        if (VarType->mType != mVariables[PossibleVariable->mText].VariableType.mType) {
+                                                            std::cerr << "Vous devez donner une valeur a la variable qui correspond au type." << std::endl;
+                                                            exit(1);
+                                                        }
+                                                    }
+                                                }
+
+                                                mVariables[variable.VariableName] = variable;
+                                                return true;
+                                            } else {
+                                                std::cerr << "Les valeurs ne peuvent que etre 'vrai' ou 'faux' !" << std::endl;
+                                                exit(1);
+                                            }
+                                        }
+                                    }
+
                                     if (CheckerOperateur(";").has_value()) {
                                         if (isVariable(PossibleVariable->mText)) {
                                             auto OldVariable = mVariables[PossibleVariable->mText];
@@ -920,7 +977,7 @@ namespace FPL {
                         if (NewType->mType == INT && var.VariableType.mType == STRING) {
                             try {
                                 int v = std::stoi(var.VariableValue);
-                                var.VariableValue = v;
+                                var.VariableValue = std::to_string(v);
                                 var.VariableType = Type("entier", INT);
                             }
                             catch (std::invalid_argument const& ex) {
@@ -929,8 +986,8 @@ namespace FPL {
                             return true;
                         } else if (NewType->mType == DOUBLE && var.VariableType.mType == STRING) {
                             try {
-                                int v = std::stod(var.VariableValue);
-                                var.VariableValue = v;
+                                double v = std::stod(var.VariableValue);
+                                var.VariableValue = std::to_string(v);
                                 var.VariableType = Type("decimal", DOUBLE);
                             }
                             catch (std::invalid_argument const& ex) {
@@ -1146,7 +1203,7 @@ namespace FPL {
             if (ManagerInstruction(fonction)) {
 
             } else {
-                if (mCurrentToken->mText.empty() || mCurrentToken->mType == ESPACEVIDE || mCurrentToken->mText == "" || mCurrentToken->mText == " ") {
+                if (mCurrentToken->mText.empty() || mCurrentToken->mType == ESPACEVIDE || mCurrentToken->mText == " ") {
                     continue;
                 }
 
