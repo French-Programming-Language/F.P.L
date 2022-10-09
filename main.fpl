@@ -3,3 +3,9 @@ envoyer a;
 
 variable bool globale b -> faux;
 envoyer b;
+
+variable auto c -> a;
+envoyer c;
+
+variable auto globale d -> b;
+envoyer d;
