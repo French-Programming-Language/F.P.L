@@ -1,4 +1,3 @@
-variable texte a -> "vrai";
-envoyer a;
-convertir a bool;
+variable texte a -> "1";
+convertir a entier;
 envoyer a;
