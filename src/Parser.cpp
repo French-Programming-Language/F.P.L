@@ -991,12 +991,10 @@ namespace FPL {
                         else if (NewType->mType == INT && var.VariableType.mType == STRING) {
                             int v = stringToInt(var.VariableValue, "Ca ne peut pas devenir une valeur de type entier !");
                             var.VariableType = Type("entier", INT);
-                            var.VariableValue = std::to_string(v);
                             return true;
                         } else if (NewType->mType == DOUBLE && var.VariableType.mType == STRING) {
                             double v = stringToDouble(var.VariableValue, "Ca ne peut pas devenir une valeur de type entier !");
                             var.VariableType = Type("decimal", DOUBLE);
-                            var.VariableValue = std::to_string(v);
                             return true;
                         } else {
                             std::cerr << "La valeur de la variable ne permet pas une conversion." << std::endl;
