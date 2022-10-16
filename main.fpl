@@ -1,11 +1,4 @@
-variable bool a -> vrai;
+variable texte a -> "vrai";
 envoyer a;
-
-variable bool globale b -> faux;
-envoyer b;
-
-variable auto c -> a;
-envoyer c;
-
-variable auto globale d -> b;
-envoyer d;
+convertir a bool;
+envoyer a;
