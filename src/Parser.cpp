@@ -976,28 +976,23 @@ namespace FPL {
                     }
 
                     if (CheckerOperateur(";").has_value()) {
-                        if (NewType->mType == INT && var.VariableType.mType == STRING) {
-                            try {
-                                int v = std::stoi(var.VariableValue);
-                                var.VariableValue = std::to_string(v);
-                                var.VariableType = Type("entier", INT);
+                        if (NewType->mType == BOOL && var.VariableType.mType == STRING) {
+                            if (var.VariableValue == "vrai" || var.VariableValue == "faux") {
+                                var.VariableType = Type("bool", BOOL);
+                                return true;
+                            } else {
+                                std::cerr << "La valeur de la variable ne peut pas etre de type booleen." << std::endl;
+                                exit(1);
                             }
-                            catch (std::invalid_argument const& ex) {
-                                std::cout << "Ca ne peut pas devenir une valeur de type entier !" << "Erreur final : " << ex.what() << std::endl;
-                            }
+                        }
+                        else if (NewType->mType == INT && var.VariableType.mType == STRING) {
+                            stringToInt(var.VariableValue, "Ca ne peut pas devenir une valeur de type entier !");
                             return true;
                         } else if (NewType->mType == DOUBLE && var.VariableType.mType == STRING) {
-                            try {
-                                double v = std::stod(var.VariableValue);
-                                var.VariableValue = std::to_string(v);
-                                var.VariableType = Type("decimal", DOUBLE);
-                            }
-                            catch (std::invalid_argument const& ex) {
-                                std::cout << "Ca ne peut pas devenir une valeur de type entier !" << "Erreur final : " << ex.what() << std::endl;
-                            }
+                            stringToDouble(var.VariableValue, "Ca ne peut pas devenir une valeur de type entier !");
                             return true;
                         } else {
-                            std::cerr << "La valeur de la variable ne permet une conversion." << std::endl;
+                            std::cerr << "La valeur de la variable ne permet pas une conversion." << std::endl;
                             exit(1);
                         }
                     } else {

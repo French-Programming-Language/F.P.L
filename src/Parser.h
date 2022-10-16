@@ -17,6 +17,8 @@
 #include "FonctionDefinition.h"
 #include "VariableDefinition.h"
 
+#include "Utils/Converts.h"
+
 namespace FPL {
 
     class Parser {
