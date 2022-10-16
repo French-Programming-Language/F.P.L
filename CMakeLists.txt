@@ -16,4 +16,5 @@ add_executable(French_Programming_Language
         src/TypeManager.h
         src/VariableDefinition.cpp
         src/VariableDefinition.h
+        src/Utils/Converts.cpp
         main.cpp)
