@@ -977,7 +977,10 @@ namespace FPL {
 
                     if (CheckerOperateur(";").has_value()) {
                         if (NewType->mType == BOOL && var.VariableType.mType == STRING) {
-                            if (var.VariableValue == "vrai" || var.VariableValue == "faux") {
+                            std::string v = var.VariableValue;
+                            std::string::iterator end_pos = std::remove(v.begin(), v.end(), ' ');
+                            v.erase(end_pos, v.end());
+                            if (v == "vrai" || v == "faux") {
                                 var.VariableType = Type("bool", BOOL);
                                 return true;
                             } else {
@@ -986,10 +989,10 @@ namespace FPL {
                             }
                         }
                         else if (NewType->mType == INT && var.VariableType.mType == STRING) {
-                            stringToInt(var.VariableValue, "Ca ne peut pas devenir une valeur de type entier !");
+                            int v = stringToInt(var.VariableValue, "Ca ne peut pas devenir une valeur de type entier !");
                             return true;
                         } else if (NewType->mType == DOUBLE && var.VariableType.mType == STRING) {
-                            stringToDouble(var.VariableValue, "Ca ne peut pas devenir une valeur de type entier !");
+                            double v = stringToDouble(var.VariableValue, "Ca ne peut pas devenir une valeur de type entier !");
                             return true;
                         } else {
                             std::cerr << "La valeur de la variable ne permet pas une conversion." << std::endl;
