@@ -1,4 +1,7 @@
-variable bool a -> faux;
-envoyer a;
-changer a -> vrai;
+definir fonc() {
+    variable bool b -> faux;
+    renvoyer b;
+}
+
+variable bool fonction a -> fonc;
 envoyer a;
