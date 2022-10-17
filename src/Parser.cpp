@@ -1044,7 +1044,18 @@ namespace FPL {
                             auto PossibleVar = CheckerIdentifiant();
                             if (PossibleVar.has_value()) {
                                 if (CheckerOperateur(";").has_value()) {
-                                    if (isVariable(PossibleVar->mText)) {
+                                    if (PossibleVar->mText == "vrai" || PossibleVar->mText == "faux") {
+                                        if (isVariable(VarName->mText)) {
+                                            auto var = mVariables[VarName->mText];
+                                            if (var.VariableType.mType == BOOL) {
+                                                mVariables[VarName->mText].VariableValue = PossibleVar->mText;
+                                                return true;
+                                            } else {
+                                                std::cerr << "Ces valeurs ne peuvent etre attribue qu'au variable de type booleen." << std::endl;
+                                                exit(1);
+                                            }
+                                        }
+                                    } else if (isVariable(PossibleVar->mText)) {
                                         if (mVariables[PossibleVar->mText].VariableType.mType == mVariables[VarName->mText].VariableType.mType) {
                                             mVariables[VarName->mText].VariableValue = mVariables[PossibleVar->mText].VariableValue;
                                             return true;
@@ -1052,7 +1063,7 @@ namespace FPL {
                                             std::cerr << "Le type de la variable n'est pas le même que celui de la variable que vous voulez modifier." << std::endl;
                                             exit(1);
                                         }
-                                    } else if (fonction != std::nullopt) {
+                                    } else if (fonction.has_value()) {
                                         if (isArgument(fonction->FonctionName, PossibleVar->mText)) {
                                             mVariables[VarName->mText].VariableValue = mArguments[fonction->FonctionName][PossibleVar->mText].ArgValue;
                                             return true;
