@@ -26,7 +26,6 @@ namespace FPL {
                 "vide",
                 "auto",
                 "importer",
-                "requete",
                 "convertir",
                 "bool",
                 "booleen"
@@ -304,6 +303,11 @@ namespace FPL {
                                     if (CheckerOperateur(";").has_value()) {
                                         fonction.HasReturn = true;
                                         fonction.ReturnIsIdentfiant = true;
+                                        if (va->mText == "vrai" || va->mText == "faux") {
+                                            fonction.ReturnType = Type("bool", BOOL);
+                                            fonction.ReturnIsIdentfiant = false;
+                                            fonction.ReturnValue = va->mText;
+                                        }
                                         fonction.ReturnIdentifantValue = va->mText;
 
                                         if (CheckerIdentifiant().has_value() || CheckerValue().has_value() || CheckerType().has_value()) {
