@@ -1,13 +1,7 @@
 variable entier a -> 3;
 
 verifier a {
-    quand 5:
+    quand 5,3:
         envoyer "Bonjour";
-        ,
-    quand 1:
-        envoyer "Yo";
-        ,
-    defaut:
-        envoyer "Salut";
         ,
 }
