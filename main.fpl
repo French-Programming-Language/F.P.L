@@ -1,7 +1,10 @@
-definir fonc() {
-    variable bool b -> faux;
-    renvoyer b;
-}
+variable entier a -> 5;
 
-variable bool fonction a -> fonc;
-envoyer a;
+verifier a {
+    quand 5:
+        envoyer "Bonjour";
+        ,
+    quand 1:
+        envoyer "Yo";
+        ,
+}
