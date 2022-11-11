@@ -223,31 +223,54 @@ namespace FPL {
                             exit(1);
                         }
 
+
+                        std::string finalValue;
                         auto wantCheckValue = CheckerValue();
-                        if (!wantCheckValue.has_value()) {
-                            std::cerr << "Vous devez mettre une valeur que vous souhaitez verifier !" << std::endl;
-                            exit(1);
+                        std::optional<Token> wantCheckIdf;
+
+                        if (wantCheckValue.has_value()) {
+                            finalValue = wantCheckValue->StatementName;
+                        } else {
+                            wantCheckIdf = CheckerIdentifiant();
+                            if (wantCheckIdf.has_value()) {
+                                if (fonction.has_value() && isArgument(fonction->FonctionName, wantCheckIdf->mText)) {
+                                    finalValue = mArguments[fonction->FonctionName][wantCheckIdf->mText].ArgValue;
+                                } else if (isVariable(wantCheckIdf->mText)) {
+                                    finalValue = mVariables[wantCheckIdf->mText].VariableValue;
+                                }
+                            } else {
+                                std::cerr << "Vous devez mettre une valeur que vous souhaitez verifier !" << std::endl;
+                                exit(1);
+                            }
                         }
+                        contentValues.push_back(finalValue);
+
 
                         if (CheckerOperateur(",").has_value()) {
-                            auto wantCheckValue2 = CheckerValue();
-                            if (wantCheckValue2.has_value()) {
-                                morethanoneValue = true;
-                                contentValues.push_back(wantCheckValue2->StatementName);
-                                contentValues.push_back(wantCheckValue->StatementName);
-
-                                while (!CheckerOperateur(":").has_value()) {
-                                    auto nextValue = CheckerValue();
-                                    if (!nextValue.has_value()) {
+                            while (!CheckerOperateur(":").has_value()) {
+                                std::string value;
+                                auto nextValue = CheckerValue();
+                                std::optional<Token> nextValueIdf;
+                                if (nextValue.has_value()) {
+                                    value = nextValue->StatementName;
+                                } else {
+                                    nextValueIdf = CheckerIdentifiant();
+                                    if (nextValueIdf.has_value()) {
+                                        if (fonction.has_value() && isArgument(fonction->FonctionName, nextValueIdf->mText)) {
+                                            value = mArguments[fonction->FonctionName][nextValueIdf->mText].ArgValue;
+                                        } else if (isVariable(nextValueIdf->mText)) {
+                                            value = mVariables[nextValueIdf->mText].VariableValue;
+                                        }
+                                    } else {
                                         std::cerr << "Vous devez mettre une valeur que vous souhaitez verifier !" << std::endl;
                                         exit(1);
                                     }
+                                }
 
-                                    contentValues.push_back(nextValue->StatementName);
+                                contentValues.push_back(value);
 
-                                    if (!CheckerOperateur(",").has_value()) {
-                                        break;
-                                    }
+                                if (!CheckerOperateur(",").has_value()) {
+                                    break;
                                 }
                             }
                         }
@@ -294,37 +317,19 @@ namespace FPL {
 
                         if (fonction.has_value() && isArgument(fonction->FonctionName, PossibleVar->mText)) {
                             auto argument = mArguments[fonction->FonctionName][PossibleVar->mText];
-                            if (!morethanoneValue) {
-                                if (argument.ArgValue == wantCheckValue->StatementName) {
-                                    parse(tokens, f);
-                                    mCurrentToken = oldCurrentToken;
-                                    didNotExecuteTheCodeWithif = true;
-                                    needToIgnore = true;
-                                }
-                            } else {
-                                if (ValueInSTRvector(contentValues, argument.ArgValue)) {
-                                    parse(tokens, f);
-                                    mCurrentToken = oldCurrentToken;
-                                    didNotExecuteTheCodeWithif = true;
-                                    needToIgnore = true;
-                                }
+                            if (ValueInSTRvector(contentValues, argument.ArgValue)) {
+                                parse(tokens, f);
+                                mCurrentToken = oldCurrentToken;
+                                didNotExecuteTheCodeWithif = true;
+                                needToIgnore = true;
                             }
                         } else if (isVariable(PossibleVar->mText)) {
                             auto variable = mVariables[PossibleVar->mText];
-                            if (!morethanoneValue) {
-                                if (variable.VariableValue == wantCheckValue->StatementName) {
-                                    parse(tokens, f);
-                                    mCurrentToken = oldCurrentToken;
-                                    didNotExecuteTheCodeWithif = true;
-                                    needToIgnore = true;
-                                }
-                            } else {
-                                if (ValueInSTRvector(contentValues, variable.VariableValue)) {
-                                    parse(tokens, f);
-                                    mCurrentToken = oldCurrentToken;
-                                    didNotExecuteTheCodeWithif = true;
-                                    needToIgnore = true;
-                                }
+                            if (ValueInSTRvector(contentValues, variable.VariableValue)) {
+                                parse(tokens, f);
+                                mCurrentToken = oldCurrentToken;
+                                didNotExecuteTheCodeWithif = true;
+                                needToIgnore = true;
                             }
                         }
 
