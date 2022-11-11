@@ -66,6 +66,9 @@ namespace FPL {
         std::optional<FonctionDefinition> getFonction(std::string &fonction);
         std::optional<ArgumentDefinition> getArgument(std::string &fonction, std::string &name);
 
+        // Conditions:
+        bool VerifierInstruction(std::optional<FonctionDefinition>& fonction);
+
         // Fichiers :
         bool FichierInstruction(std::optional<FonctionDefinition>& fonction);
 
