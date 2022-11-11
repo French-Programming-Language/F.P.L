@@ -28,7 +28,8 @@ namespace FPL {
                 "importer",
                 "convertir",
                 "bool",
-                "booleen"
+                "booleen",
+                "verifier"
         };
     }
 
@@ -187,6 +188,82 @@ namespace FPL {
                 }
             } else {
                 std::cerr << "Vous devez preciser le nom du fichier auquel vous voulez executer une instruction." << std::endl;
+                exit(1);
+            }
+        }
+        return false;
+    }
+
+    bool Parser::VerifierInstruction(std::optional<FonctionDefinition>& fonction) {
+        auto PossibleVar = CheckerIdentifiant();
+        if (PossibleVar.has_value()) {
+            if (CheckerOperateur("{").has_value()) {
+                while (!CheckerOperateur("}").has_value()) {
+                    std::vector<std::string> contentChecking;
+
+                    auto checkerInstruction = CheckerIdentifiant();
+                    if (!checkerInstruction.has_value() && CheckerOperateur("}").has_value()) {
+                        break;
+                    } else if (!checkerInstruction.has_value() || checkerInstruction->mText != "quand") {
+                        std::cerr << "Vous devez verifier une valeur avec 'quand' !" << std::endl;
+                        exit(1);
+                    }
+
+                    auto wantCheckValue = CheckerValue();
+                    if (!wantCheckValue.has_value()) {
+                        std::cerr << "Vous devez une valeur que vous souhaitez verifier !" << std::endl;
+                        exit(1);
+                    }
+
+                    if (CheckerOperateur(":").has_value()) {
+                        while (!CheckerOperateur(",").has_value()) {
+                            if (mCurrentToken->mType == CHAINE_LITERAL) {
+                                mCurrentToken->mText += "\"";
+                            }
+
+                            contentChecking.push_back(mCurrentToken->mText);
+                            ++mCurrentToken;
+                        }
+                    } else {
+                        std::cerr << "Vous devez mettre le symbole ':' pour mettre votre code." << std::endl;
+                        exit(1);
+                    }
+
+                    std::string finalContent;
+
+                    for (auto const &a : contentChecking) {
+                        finalContent.append(a).append(" ");
+                    }
+
+                    TokenBuilding t;
+                    std::cout << "" << std::endl; // IGNORE (finalContent) -> sans le print, cela ne marche plus.
+                    std::vector<Token> tokens = t.parseToken(finalContent);
+
+                    auto FCurrToken = tokens.begin();
+                    auto oldCurrentToken = mCurrentToken;
+                    std::optional<FonctionDefinition> f = fonction;
+
+                    if (fonction.has_value() && isArgument(fonction->FonctionName, PossibleVar->mText)) {
+                        auto argument = mArguments[fonction->FonctionName][PossibleVar->mText];
+                        if (argument.ArgValue == wantCheckValue->StatementName) {
+                            parse(tokens, f);
+                            mCurrentToken = oldCurrentToken;
+                        }
+                    } else if (isVariable(PossibleVar->mText)) {
+                        auto variable = mVariables[PossibleVar->mText];
+                        if (variable.VariableValue == wantCheckValue->StatementName) {
+                            parse(tokens, f);
+                            mCurrentToken = oldCurrentToken;
+                        }
+                    }
+
+                    if (CheckerOperateur("}").has_value()) {
+                        break;
+                    }
+                }
+                return true;
+            } else {
+                std::cerr << "Vous devez mettre le symbole '{' pour ouvrir l'instruction." << std::endl;
                 exit(1);
             }
         }
@@ -1183,8 +1260,8 @@ namespace FPL {
     }
 
     bool Parser::ManagerInstruction(std::optional<FonctionDefinition>& fonction) {
-        auto const parseStart = mCurrentToken; // std::vector<Token>::iterator
-        auto const PeutEtreInstruction = CheckerIdentifiant();
+        auto parseStart = mCurrentToken; // std::vector<Token>::iterator
+        auto PeutEtreInstruction = CheckerIdentifiant();
         if (PeutEtreInstruction.has_value()) {
             if (PeutEtreInstruction->mText == "envoyer") {
                 if (PrintInstruction(parseStart, fonction)) { return true; } else { return false; }
@@ -1204,6 +1281,8 @@ namespace FPL {
                 if (ImportInstruction(fonction)) { return true; } else { return false; }
             } else if (PeutEtreInstruction->mText == "convertir") {
                 if (ConversionInstruction(fonction)) { return true; } else { return false; }
+            } else if (PeutEtreInstruction->mText == "verifier") {
+                if (VerifierInstruction(fonction)) { return true; } else { return false; }
             }
             else {
                 mCurrentToken = parseStart;
