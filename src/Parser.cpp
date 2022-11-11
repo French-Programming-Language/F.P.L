@@ -208,50 +208,65 @@ namespace FPL {
         auto PossibleVar = CheckerIdentifiant();
         if (PossibleVar.has_value()) {
             if (CheckerOperateur("{").has_value()) {
+                bool needToIgnore = false;
                 while (!CheckerOperateur("}").has_value()) {
-                    std::vector<std::string> contentChecking;
-                    std::vector<std::string> contentValues;
-                    bool morethanoneValue = false;
+                    if (!needToIgnore) {
+                        std::vector<std::string> contentChecking;
+                        std::vector<std::string> contentValues;
+                        bool morethanoneValue = false;
 
-                    auto checkerInstruction = CheckerIdentifiant();
-                    if (!checkerInstruction.has_value() && CheckerOperateur("}").has_value()) {
-                        break;
-                    } else if (checkerInstruction->mText != "quand") {
-                        std::cerr << "Vous devez verifier une valeur avec 'quand' !" << std::endl;
-                        exit(1);
-                    }
+                        auto checkerInstruction = CheckerIdentifiant();
+                        if (!checkerInstruction.has_value() && CheckerOperateur("}").has_value()) {
+                            break;
+                        } else if (checkerInstruction->mText != "quand") {
+                            std::cerr << "Vous devez verifier une valeur avec 'quand' !" << std::endl;
+                            exit(1);
+                        }
 
-                    auto wantCheckValue = CheckerValue();
-                    if (!wantCheckValue.has_value()) {
-                        std::cerr << "Vous devez mettre une valeur que vous souhaitez verifier !" << std::endl;
-                        exit(1);
-                    }
+                        auto wantCheckValue = CheckerValue();
+                        if (!wantCheckValue.has_value()) {
+                            std::cerr << "Vous devez mettre une valeur que vous souhaitez verifier !" << std::endl;
+                            exit(1);
+                        }
 
-                    if (CheckerOperateur(",").has_value()) {
-                        auto wantCheckValue2 = CheckerValue();
-                        if (wantCheckValue2.has_value()) {
-                            morethanoneValue = true;
-                            contentValues.push_back(wantCheckValue2->StatementName);
-                            contentValues.push_back(wantCheckValue->StatementName);
+                        if (CheckerOperateur(",").has_value()) {
+                            auto wantCheckValue2 = CheckerValue();
+                            if (wantCheckValue2.has_value()) {
+                                morethanoneValue = true;
+                                contentValues.push_back(wantCheckValue2->StatementName);
+                                contentValues.push_back(wantCheckValue->StatementName);
 
-                            while (!CheckerOperateur(":").has_value()) {
-                                auto nextValue = CheckerValue();
-                                if (!nextValue.has_value()) {
-                                    std::cerr << "Vous devez mettre une valeur que vous souhaitez verifier !" << std::endl;
-                                    exit(1);
-                                }
+                                while (!CheckerOperateur(":").has_value()) {
+                                    auto nextValue = CheckerValue();
+                                    if (!nextValue.has_value()) {
+                                        std::cerr << "Vous devez mettre une valeur que vous souhaitez verifier !" << std::endl;
+                                        exit(1);
+                                    }
 
-                                contentValues.push_back(nextValue->StatementName);
+                                    contentValues.push_back(nextValue->StatementName);
 
-                                if (!CheckerOperateur(",").has_value()) {
-                                    break;
+                                    if (!CheckerOperateur(",").has_value()) {
+                                        break;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    if (!morethanoneValue) {
-                        if (CheckerOperateur(":").has_value()) {
+                        if (!morethanoneValue) {
+                            if (CheckerOperateur(":").has_value()) {
+                                while (!CheckerOperateur(",").has_value()) {
+                                    if (mCurrentToken->mType == CHAINE_LITERAL) {
+                                        mCurrentToken->mText += "\"";
+                                    }
+
+                                    contentChecking.push_back(mCurrentToken->mText);
+                                    ++mCurrentToken;
+                                }
+                            } else {
+                                std::cerr << "Vous devez mettre le symbole ':' pour mettre votre code." << std::endl;
+                                exit(1);
+                            }
+                        } else {
                             while (!CheckerOperateur(",").has_value()) {
                                 if (mCurrentToken->mType == CHAINE_LITERAL) {
                                     mCurrentToken->mText += "\"";
@@ -260,109 +275,101 @@ namespace FPL {
                                 contentChecking.push_back(mCurrentToken->mText);
                                 ++mCurrentToken;
                             }
-                        } else {
-                            std::cerr << "Vous devez mettre le symbole ':' pour mettre votre code." << std::endl;
-                            exit(1);
                         }
-                    } else {
-                        while (!CheckerOperateur(",").has_value()) {
-                            if (mCurrentToken->mType == CHAINE_LITERAL) {
-                                mCurrentToken->mText += "\"";
-                            }
 
-                            contentChecking.push_back(mCurrentToken->mText);
-                            ++mCurrentToken;
+                        std::string finalContent;
+                        for (auto const &a : contentChecking) {
+                            finalContent.append(a).append(" ");
                         }
-                    }
 
-                    std::string finalContent;
-                    for (auto const &a : contentChecking) {
-                        finalContent.append(a).append(" ");
-                    }
+                        TokenBuilding t;
+                        std::cout << "" << std::endl; // IGNORE (finalContent) -> sans le print, cela ne marche plus.
+                        std::vector<Token> tokens = t.parseToken(finalContent);
 
-                    TokenBuilding t;
-                    std::cout << "" << std::endl; // IGNORE (finalContent) -> sans le print, cela ne marche plus.
-                    std::vector<Token> tokens = t.parseToken(finalContent);
+                        auto FCurrToken = tokens.begin();
+                        auto oldCurrentToken = mCurrentToken;
+                        std::optional<FonctionDefinition> f = fonction;
 
-                    auto FCurrToken = tokens.begin();
-                    auto oldCurrentToken = mCurrentToken;
-                    std::optional<FonctionDefinition> f = fonction;
+                        bool didNotExecuteTheCodeWithif = false;
 
-                    bool didNotExecuteTheCodeWithif = false;
-
-                    if (fonction.has_value() && isArgument(fonction->FonctionName, PossibleVar->mText)) {
-                        auto argument = mArguments[fonction->FonctionName][PossibleVar->mText];
-                        if (!morethanoneValue) {
-                            if (argument.ArgValue == wantCheckValue->StatementName) {
-                                parse(tokens, f);
-                                mCurrentToken = oldCurrentToken;
-                                didNotExecuteTheCodeWithif = true;
+                        if (fonction.has_value() && isArgument(fonction->FonctionName, PossibleVar->mText)) {
+                            auto argument = mArguments[fonction->FonctionName][PossibleVar->mText];
+                            if (!morethanoneValue) {
+                                if (argument.ArgValue == wantCheckValue->StatementName) {
+                                    parse(tokens, f);
+                                    mCurrentToken = oldCurrentToken;
+                                    didNotExecuteTheCodeWithif = true;
+                                    needToIgnore = true;
+                                }
+                            } else {
+                                if (ValueInSTRvector(contentValues, argument.ArgValue)) {
+                                    parse(tokens, f);
+                                    mCurrentToken = oldCurrentToken;
+                                    didNotExecuteTheCodeWithif = true;
+                                    needToIgnore = true;
+                                }
                             }
-                        } else {
-                            if (ValueInSTRvector(contentValues, argument.ArgValue)) {
-                                parse(tokens, f);
-                                mCurrentToken = oldCurrentToken;
-                                didNotExecuteTheCodeWithif = true;
-                            }
-                        }
-                    } else if (isVariable(PossibleVar->mText)) {
-                        auto variable = mVariables[PossibleVar->mText];
-                        if (!morethanoneValue) {
-                            if (variable.VariableValue == wantCheckValue->StatementName) {
-                                parse(tokens, f);
-                                mCurrentToken = oldCurrentToken;
-                                didNotExecuteTheCodeWithif = true;
-                            }
-                        } else {
-                            if (ValueInSTRvector(contentValues, variable.VariableValue)) {
-                                parse(tokens, f);
-                                mCurrentToken = oldCurrentToken;
-                                didNotExecuteTheCodeWithif = true;
+                        } else if (isVariable(PossibleVar->mText)) {
+                            auto variable = mVariables[PossibleVar->mText];
+                            if (!morethanoneValue) {
+                                if (variable.VariableValue == wantCheckValue->StatementName) {
+                                    parse(tokens, f);
+                                    mCurrentToken = oldCurrentToken;
+                                    didNotExecuteTheCodeWithif = true;
+                                    needToIgnore = true;
+                                }
+                            } else {
+                                if (ValueInSTRvector(contentValues, variable.VariableValue)) {
+                                    parse(tokens, f);
+                                    mCurrentToken = oldCurrentToken;
+                                    didNotExecuteTheCodeWithif = true;
+                                    needToIgnore = true;
+                                }
                             }
                         }
-                    }
 
-                    auto elseInstruction = CheckerIdentifiant();
-                    if (elseInstruction.has_value() && elseInstruction->mText == "defaut") {
-                        if (CheckerOperateur(":").has_value()) {
-                            if (!didNotExecuteTheCodeWithif) {
-                                std::vector<std::string> newContent;
-                                while (!CheckerOperateur(",").has_value()) {
-                                    if (mCurrentToken->mType == CHAINE_LITERAL) {
-                                        mCurrentToken->mText += "\"";
+                        auto elseInstruction = CheckerIdentifiant();
+                        if (elseInstruction.has_value() && elseInstruction->mText == "defaut") {
+                            if (CheckerOperateur(":").has_value()) {
+                                if (!didNotExecuteTheCodeWithif) {
+                                    std::vector<std::string> newContent;
+                                    while (!CheckerOperateur(",").has_value()) {
+                                        if (mCurrentToken->mType == CHAINE_LITERAL) {
+                                            mCurrentToken->mText += "\"";
+                                        }
+
+                                        newContent.push_back(mCurrentToken->mText);
+                                        ++mCurrentToken;
                                     }
 
-                                    newContent.push_back(mCurrentToken->mText);
-                                    ++mCurrentToken;
+                                    std::string finalContent2;
+                                    for (auto const &a : newContent) {
+                                        finalContent2.append(a).append(" ");
+                                    }
+
+                                    TokenBuilding t2;
+                                    std::cout << "" << std::endl; // IGNORE (finalContent) -> sans le print, cela ne marche plus.
+                                    std::vector<Token> tokens2 = t2.parseToken(finalContent2);
+
+                                    auto FCurrToken2 = tokens2.begin();
+                                    auto oldCurrentToken2 = mCurrentToken;
+
+                                    parse(tokens2, f);
+                                    mCurrentToken = oldCurrentToken2;
+
+                                    if (!CheckerOperateur("}").has_value()) {
+                                        std::cerr << "Vous devez l'instruction 'defaut' en dernier et terminer par la fermeture de l'instruction 'verifier' !" << std::endl;
+                                        exit(1);
+                                    }
+                                    needToIgnore = true;
+                                    return true;
                                 }
-
-                                std::string finalContent2;
-                                for (auto const &a : newContent) {
-                                    finalContent2.append(a).append(" ");
-                                }
-
-                                TokenBuilding t2;
-                                std::cout << "" << std::endl; // IGNORE (finalContent) -> sans le print, cela ne marche plus.
-                                std::vector<Token> tokens2 = t2.parseToken(finalContent2);
-
-                                auto FCurrToken2 = tokens2.begin();
-                                auto oldCurrentToken2 = mCurrentToken;
-
-                                parse(tokens2, f);
-                                mCurrentToken = oldCurrentToken2;
-
-                                if (!CheckerOperateur("}").has_value()) {
-                                    std::cerr << "Vous devez l'instruction 'defaut' en dernier et terminer par la fermeture de l'instruction 'verifier' !" << std::endl;
-                                    exit(1);
-                                }
-                                return true;
+                            } else {
+                                std::cerr << "Vous devez mettre le symbole ':' pour mettre votre code." << std::endl;
+                                exit(1);
                             }
-                        } else {
-                            std::cerr << "Vous devez mettre le symbole ':' pour mettre votre code." << std::endl;
-                            exit(1);
                         }
                     }
-
                     if (CheckerOperateur("}").has_value()) {
                         break;
                     }
