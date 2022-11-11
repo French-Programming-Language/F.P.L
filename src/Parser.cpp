@@ -204,7 +204,7 @@ namespace FPL {
                     auto checkerInstruction = CheckerIdentifiant();
                     if (!checkerInstruction.has_value() && CheckerOperateur("}").has_value()) {
                         break;
-                    } else if (!checkerInstruction.has_value() || checkerInstruction->mText != "quand") {
+                    } else if (checkerInstruction->mText != "quand") {
                         std::cerr << "Vous devez verifier une valeur avec 'quand' !" << std::endl;
                         exit(1);
                     }
@@ -230,7 +230,6 @@ namespace FPL {
                     }
 
                     std::string finalContent;
-
                     for (auto const &a : contentChecking) {
                         finalContent.append(a).append(" ");
                     }
@@ -243,17 +242,63 @@ namespace FPL {
                     auto oldCurrentToken = mCurrentToken;
                     std::optional<FonctionDefinition> f = fonction;
 
+                    bool didNotExecuteTheCodeWithif = false;
+
                     if (fonction.has_value() && isArgument(fonction->FonctionName, PossibleVar->mText)) {
                         auto argument = mArguments[fonction->FonctionName][PossibleVar->mText];
                         if (argument.ArgValue == wantCheckValue->StatementName) {
                             parse(tokens, f);
                             mCurrentToken = oldCurrentToken;
+                            didNotExecuteTheCodeWithif = true;
                         }
                     } else if (isVariable(PossibleVar->mText)) {
                         auto variable = mVariables[PossibleVar->mText];
                         if (variable.VariableValue == wantCheckValue->StatementName) {
                             parse(tokens, f);
                             mCurrentToken = oldCurrentToken;
+                            didNotExecuteTheCodeWithif = true;
+                        }
+                    }
+
+
+                    auto elseInstruction = CheckerIdentifiant();
+                    if (elseInstruction.has_value() && elseInstruction->mText == "defaut") {
+                        if (CheckerOperateur(":").has_value()) {
+                            if (!didNotExecuteTheCodeWithif) {
+                                std::vector<std::string> newContent;
+                                while (!CheckerOperateur(",").has_value()) {
+                                    if (mCurrentToken->mType == CHAINE_LITERAL) {
+                                        mCurrentToken->mText += "\"";
+                                    }
+
+                                    newContent.push_back(mCurrentToken->mText);
+                                    ++mCurrentToken;
+                                }
+
+                                std::string finalContent2;
+                                for (auto const &a : newContent) {
+                                    finalContent2.append(a).append(" ");
+                                }
+
+                                TokenBuilding t2;
+                                std::cout << "" << std::endl; // IGNORE (finalContent) -> sans le print, cela ne marche plus.
+                                std::vector<Token> tokens2 = t2.parseToken(finalContent2);
+
+                                auto FCurrToken2 = tokens2.begin();
+                                auto oldCurrentToken2 = mCurrentToken;
+
+                                parse(tokens2, f);
+                                mCurrentToken = oldCurrentToken2;
+
+                                if (!CheckerOperateur("}").has_value()) {
+                                    std::cerr << "Vous devez l'instruction 'defaut' en dernier et terminer par la fermeture de l'instruction 'verifier' !" << std::endl;
+                                    exit(1);
+                                }
+                                return true;
+                            }
+                        } else {
+                            std::cerr << "Vous devez mettre le symbole ':' pour mettre votre code." << std::endl;
+                            exit(1);
                         }
                     }
 
