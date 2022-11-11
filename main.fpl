@@ -4,4 +4,7 @@ verifier a {
     quand 5,3:
         envoyer "Bonjour";
         ,
+    defaut:
+        envoyer "salut";
+        ,
 }
