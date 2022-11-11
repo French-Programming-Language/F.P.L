@@ -1,4 +1,4 @@
-variable entier a -> 5;
+variable entier a -> 3;
 
 verifier a {
     quand 5:
@@ -6,5 +6,8 @@ verifier a {
         ,
     quand 1:
         envoyer "Yo";
+        ,
+    defaut:
+        envoyer "Salut";
         ,
 }
