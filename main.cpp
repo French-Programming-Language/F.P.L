@@ -4,7 +4,6 @@
 #include <iostream>
 #include <string>
 #include <optional>
-#include <fstream>
 
 int main(int argc, char** argv) {
     std::string fileName;
