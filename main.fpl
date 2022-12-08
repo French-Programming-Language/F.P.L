@@ -1,10 +1,15 @@
-variable entier a -> 12;
+variable entier a -> 15;
 
-variable entier b -> 12;
-variable entier c -> 10;
-
-verifier a {
-    quand c, b:
-        envoyer "Bonjour";
-        ,
+tant que a = 10, decrementer 1 {
+    envoyer "Yo";
 }
+
+envoyer a;
+
+variable entier b -> 5;
+
+tant que b = 20, incrementer 1 {
+    envoyer "Yo 2";
+}
+
+envoyer b;
