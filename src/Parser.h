@@ -69,6 +69,9 @@ namespace FPL {
         // Conditions:
         bool VerifierInstruction(std::optional<FonctionDefinition>& fonction);
 
+        // Boucles:
+        bool TantQueInstruction(std::optional<FonctionDefinition>& fonction);
+
         // Fichiers :
         bool FichierInstruction(std::optional<FonctionDefinition>& fonction);
 
