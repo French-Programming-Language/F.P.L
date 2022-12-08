@@ -367,7 +367,6 @@ namespace FPL {
                                         exit(1);
                                     }
                                     needToIgnore = true;
-                                    return true;
                                 }
                             } else {
                                 std::cerr << "Vous devez mettre le symbole ':' pour mettre votre code." << std::endl;
@@ -384,6 +383,147 @@ namespace FPL {
                 std::cerr << "Vous devez mettre le symbole '{' pour ouvrir l'instruction." << std::endl;
                 exit(1);
             }
+        }
+        return false;
+    }
+
+    bool Parser::TantQueInstruction(std::optional<FonctionDefinition>& fonction) {
+        auto queInstruction = CheckerIdentifiant();
+        if (queInstruction.has_value() && queInstruction->mText == "que") {
+            auto Variable = CheckerIdentifiant();
+            if (Variable.has_value() && isVariable(Variable->mText)) {
+                VariableDefinition var = mVariables[Variable->mText];
+                if (var.VariableType.mType == STRING || var.VariableType.mType == BOOL) {
+                    std::cerr << "Il faut que ce soit un chiffre/nombre." << std::endl;
+                    exit(1);
+                }
+
+                auto operatorLoop = CheckerOperateur();
+                if (operatorLoop.has_value()) {
+                    auto secondOperatorLoop = CheckerOperateur();
+
+                    auto valueCheck = CheckerValue();
+                    if (valueCheck->StatementType.mType == STRING || valueCheck->StatementType.mType == BOOL) {
+                        std::cerr << "Il faut que ce soit un chiffre/nombre." << std::endl;
+                        exit(1);
+                    }
+
+                    if (var.VariableValue == valueCheck->StatementName) {
+                        return true;
+                    }
+
+                    if (CheckerOperateur(",").has_value()) {
+                        auto IncrDecr = CheckerIdentifiant();
+                        if (IncrDecr.has_value()) {
+                            auto numberIncrDesincr = CheckerValue();
+                            if (numberIncrDesincr->StatementType.mType == STRING || numberIncrDesincr->StatementType.mType == BOOL) {
+                                std::cerr << "Il faut que ce soit un chiffre/nombre." << std::endl;
+                                exit(1);
+                            }
+
+                            if (!CheckerOperateur("{").has_value()) {
+                                std::cerr << "Il faut ouvrir l'instruction pour mettre votre code avec des '{' et fermer avec '}'." << std::endl;
+                                exit(1);
+                            }
+
+                            double varValueInt = std::stod(var.VariableValue);
+
+                            std::vector<std::string> contentLoop;
+                            while (!CheckerOperateur("}").has_value()) {
+                                if (mCurrentToken->mType == CHAINE_LITERAL) {
+                                    mCurrentToken->mText += "\"";
+                                }
+
+                                contentLoop.push_back(mCurrentToken->mText);
+                                ++mCurrentToken;
+
+                                if (CheckerOperateur("}").has_value()) {
+                                    break;
+                                }
+                            }
+                            std::string finalContent;
+                            for (auto const &a : contentLoop) {
+                                finalContent.append(a).append(" ");
+                            }
+                            TokenBuilding t;
+                            std::cout << "" << std::endl;
+                            std::vector<Token> tokens = t.parseToken(finalContent);
+                            auto FCurrToken = tokens.begin();
+                            auto oldCurrentToken = mCurrentToken;
+                            std::optional<FonctionDefinition> f = fonction;
+
+                            if (IncrDecr->mText == "incrementer") {
+                                if (operatorLoop->mText == "<") {
+
+                                } else if (operatorLoop->mText == ">") {
+                                    std::cerr << "Cette operateur conditionnelle est impossible car vous souhaitez retirer une valuer alors que c'est deja superieur." << std::endl;
+                                    exit(1);
+                                } else if (operatorLoop->mText == ">" && secondOperatorLoop.has_value() && secondOperatorLoop->mText == "=") {
+                                    std::cerr << "Cette operateur conditionnelle est impossible car vous souhaitez retirer une valuer alors que c'est deja superieur ou egal." << std::endl;
+                                    exit(1);
+                                } else if (operatorLoop->mText == "<" && secondOperatorLoop.has_value() && secondOperatorLoop->mText == "=") {
+
+                                } else if (operatorLoop->mText == "=") {
+                                   while (std::stod(var.VariableValue) < std::stod(valueCheck->StatementName)) {
+                                        parse(tokens, f);
+                                        varValueInt += std::stod(numberIncrDesincr->StatementName);
+                                        var.VariableValue = std::to_string(varValueInt);
+                                    }
+
+                                    mVariables[var.VariableName].VariableValue = var.VariableValue;
+
+                                    mCurrentToken = oldCurrentToken;
+                                    return true;
+                                } else {
+                                    std::cerr << "L'operateur conditionnelle n'existe pas : ." << operatorLoop->mText << std::endl;
+                                    exit(1);
+                                }
+                            } else if (IncrDecr->mText == "decrementer") {
+                                if (operatorLoop->mText == "<") {
+                                    std::cerr << "Cette operateur conditionnelle est impossible car vous souhaitez retirer une valuer alors que c'est deja inferieur." << std::endl;
+                                    exit(1);
+                                } else if (operatorLoop->mText == ">") {
+
+                                } else if (operatorLoop->mText == ">" && secondOperatorLoop.has_value() && secondOperatorLoop->mText == "=") {
+
+                                } else if (operatorLoop->mText == "<" && secondOperatorLoop.has_value() && secondOperatorLoop->mText == "=") {
+                                    std::cerr << "Cette operateur conditionnelle est impossible car vous souhaitez retirer une valuer alors que c'est deja inferieur ou egal." << std::endl;
+                                    exit(1);
+                                } else if (operatorLoop->mText == "=") {
+                                    while (std::stod(var.VariableValue) > std::stod(valueCheck->StatementName)) {
+                                        parse(tokens, f);
+                                        varValueInt -= std::stod(numberIncrDesincr->StatementName);
+                                        var.VariableValue = std::to_string(varValueInt);
+                                    }
+
+                                    mVariables[var.VariableName].VariableValue = var.VariableValue;
+
+                                    mCurrentToken = oldCurrentToken;
+                                    return true;
+                                } else {
+                                    std::cerr << "L'operateur conditionnelle n'existe pas : ." << operatorLoop->mText << std::endl;
+                                    exit(1);
+                                }
+                            } else {
+                                std::cerr << "Pour poursuivre l'instruction vous devez preciser 'incrementer' ou 'decrementer'." << std::endl;
+                                exit(1);
+                            }
+                        } else {
+                            std::cerr << "Pour poursuivre l'instruction vous devez preciser 'incrementer' ou 'decrementer'." << std::endl;
+                            exit(1);
+                        }
+                    } else {
+                        std::cerr << "Vous devez inserer une ',' pour poursuivre l'instruction et preciser une incrementation ou une decrementation." << std::endl;
+                        exit(1);
+                    }
+                }
+            } else {
+                std::cerr << "Le premier argument doit etre une variable." << std::endl;
+                exit(1);
+            }
+        } else {
+            std::cerr << "L'instruction excate est 'tant que'." << std::endl;
+            exit(1);
         }
         return false;
     }
@@ -1401,6 +1541,8 @@ namespace FPL {
                 if (ConversionInstruction(fonction)) { return true; } else { return false; }
             } else if (PeutEtreInstruction->mText == "verifier") {
                 if (VerifierInstruction(fonction)) { return true; } else { return false; }
+            } else if (PeutEtreInstruction->mText == "tant") {
+                if (TantQueInstruction(fonction)) { return true; } else { return false; }
             }
             else {
                 mCurrentToken = parseStart;
