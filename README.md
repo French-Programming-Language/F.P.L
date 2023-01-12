@@ -1,6 +1,6 @@
 # **French Programming Language**
 
-FPL est un langage de programmation français par créé Program.
+F.P.L. est un langage de programmation français réalisé par Program.
 
 Le Python est un langage nommé "simple" pour faire apprendre aux étudiants le code.
 
@@ -22,7 +22,7 @@ Honnêtement, j'adore utiliser leurs outils et ce qu'ils proposent est juste inc
 
 Cela dépend de vos gouts, mais si vous le souhaitez (et je vous conseille) vous pouvez essayer les outils et voir s'ils sont bons à vos yeux.
 
-Depuis que j'utilise leurs outils, je me sens bien et presque mieux je dirais.
+Depuis que j'utilise leurs outils, je me sens bien et presque mieux je dirai.
 
 [Site de JetBrains](https://www.jetbrains.com/fr-fr/)
 
@@ -31,9 +31,9 @@ Depuis que j'utilise leurs outils, je me sens bien et presque mieux je dirais.
 Pour commencer à apprendre le langage F.P.L, il faut comprendre le fonctionnement des différents 
 [fichiers](https://program-4.gitbook.io/french-programming-language/les-fichiers) fournis dans les _releases_ du projet.
 
-Ensuite il faut apprendre les différents [types](https://program-4.gitbook.io/french-programming-language/instructions/les-types) disponibles.
+Ensuite, à droite de la page, vous avez différentes fonctionnalités disponibles avec ce langage.
 
-Pour continuer, vous devez suivre l'ordre qui est affiché à votre droite.
+Je vous conseille fortement de prendre le temps de bien lire.
 
 ## **Liens utiles**
 
@@ -41,8 +41,8 @@ Pour continuer, vous devez suivre l'ordre qui est affiché à votre droite.
 
 [Contribuer au projet](CONTRIBUTING.md)
 
-[Serveur Discord de FPL](https://discord.gg/CkFFgXuKwj)
+[Serveur Discord de F.P.l.](https://discord.gg/CkFFgXuKwj)
 
 [Site de JetBrains](https://www.jetbrains.com/fr-fr/)
 
-[Documentation de FPl](https://program-4.gitbook.io/french-programming-language/)
+[Documentation de F.P.l.](https://program-4.gitbook.io/french-programming-language/)
