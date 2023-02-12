@@ -1,9 +1,9 @@
-#include "src/TokenBuilding.h"
-#include "src/Parser.h"
-#include "src/FonctionDefinition.h"
 #include <iostream>
-#include <string>
-#include <optional>
+
+#include "src/Essentials/Tokenizer.h"
+#include "src/Essentials/Parser.h"
+
+using namespace FPL;
 
 int main(int argc, char** argv) {
     std::string fileName;
@@ -19,10 +19,10 @@ int main(int argc, char** argv) {
         std::cerr << "Donnez le nom correct du fichier." << std::endl;
         return 1;
     }
-    std::string f_content((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
-    FPL::TokenBuilding t;
-    std::vector<FPL::Token> tokens = t.parseToken(f_content);
-    FPL::Parser parser;
-    parser.parse(tokens, (std::optional<FPL::FonctionDefinition> &) std::nullopt);
+    std::string FileCode((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
+
+    std::vector<Tokenizer::Token> FileCode_Tokens = FPL::Tokenizer::TokenBuilder::ParseToken(FileCode);
+    FPL::Parser::Parser::ParserCode(FileCode_Tokens);
+
     return 0;
 }
