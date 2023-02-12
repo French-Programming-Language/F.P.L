@@ -6,11 +6,11 @@ Ces règles s'appliquent sur le serveur discord du projet et dans n'importe quel
 
 ### Règles
 
-1.1 : Toute incitation à la haine est formellement interdit.
+1.1 : Toute incitation à la haine est formellement interdite.
 
 1.2 : Je ne tolère aucune insulte et provocation.
 
-1.3 : Toute forme de discrimination n'est pas autorisé (sexisme, racisme, homophobie, transphobie, etc.).
+1.3 : Toute forme de discrimination n'est pas autorisée (sexisme, racisme, homophobie, transphobie, etc.).
 
 1.4 : L'humour doit avoir des limites, ne pas pousser trop loin.
 
@@ -28,8 +28,10 @@ Ces règles s'appliquent sur le serveur discord du projet et dans n'importe quel
 
 2.2 : Abuser de ses permissions est révoqué !
 
+2.3 : Le contournement n'est en aucun cas accepté, vous risquez d'aggraver votre peine.
+
 Si vous êtes victimes, veuillez prendre des preuves (vidéo, audio ou image) et contacter un modérateur/administrateur sur le serveur discord.
 
 ### Sanctions
 
-Les sanctions varient en fonction de la gravité de l'acte, de l'interdiction de parler au banissement.
+Les sanctions varient en fonction de la gravité de l'acte, de l'interdiction de parler au banissement sur le serveur discord et github. 
