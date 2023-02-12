@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     std::ifstream file { fileName};
     if (!file) {
         std::cerr << "Donnez le nom correct du fichier." << std::endl;
-        return 1;
+        return -1;
     }
     std::string FileCode((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
 
