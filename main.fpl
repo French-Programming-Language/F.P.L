@@ -1,15 +1,1 @@
-variable entier a -> 15;
-
-tant que a = 10, decrementer 1 {
-    envoyer "Yo";
-}
-
-envoyer a;
-
-variable entier b -> 5;
-
-tant que b = 20, incrementer 1 {
-    envoyer "Yo 2";
-}
-
-envoyer b;
+envoyer "yo";
