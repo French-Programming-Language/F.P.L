@@ -1,1 +1,11 @@
-envoyer "yo";
+definir a () {
+    definir b() {
+        definir c() {
+                envoyer "cc";
+        }
+        appeler c;
+    }
+    appeler b;
+}
+
+appeler a;
