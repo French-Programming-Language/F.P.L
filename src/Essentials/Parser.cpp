@@ -207,15 +207,30 @@ namespace FPL::Parser {
 
                 if (ExpectOperator(data, "{").has_value()) {
                     // On récupère le contenu de la fonction
-                    while (!ExpectOperator(data, "}").has_value()) {
+
+                    int totalInstructionInDefinition = 0;
+
+                    while (true) {
                         auto currentToken = data.current_token;
+                        if (currentToken->TokenText == "definir") {
+                            totalInstructionInDefinition += 1;
+                        }
+
                         if (currentToken->TokenType == FPL::Tokenizer::CHAINE_LITTERAL) {
                             currentToken->TokenText = "\"" + currentToken->TokenText += "\"";
                         }
                         fonction.FonctionContentCode.push_back(currentToken->TokenText);
                         data.incrementeTokens(data);
 
-                        if (ExpectOperator(data, "}").has_value()) { break; }
+                        if (ExpectOperator(data, "}").has_value()) {
+                            if (totalInstructionInDefinition > 0) {
+                                fonction.FonctionContentCode.emplace_back("}");
+                                totalInstructionInDefinition -= 1;
+                            } else {
+                                break;
+                            }
+                        }
+
                     }
 
                     data.Map_Fonctions[fonction.FonctionName] = fonction;
