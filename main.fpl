@@ -1,7 +1,6 @@
-paquet Info {
-    paquet a {
-        variable entier a -> 10;
-    }
+definir main () {
+    renvoyer "cc";
 }
 
-envoyer "cc";
+variable texte fonction a -> main;
+envoyer a;
