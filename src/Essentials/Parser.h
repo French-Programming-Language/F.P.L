@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iterator>
 #include <algorithm>
+#include <stack>
 
 #include "Tokenizer.h"
 #include "Utils/Expecter.h"
@@ -21,6 +22,7 @@
 
 #include "../Instructions/Prints.h"
 #include "../Instructions/Inputs.h"
+#include "../Instructions/FunctionsUtils.h"
 
 #include "MathUtils/MathParser/MathParser.h"
 
@@ -47,6 +49,6 @@ namespace FPL::Parser {
         static void AppelerInstruction(FPL::Data::Data& data);
         static void RenvoyerInstruction(FPL::Data::Data& data, std::optional<FPL::FonctionDef> fonction);
 
-        static void PaquetInstruction(FPL::Data::Data& data, const std::optional<FPL::FonctionDef>& fonction, std::optional<FPL::Paquet::Paquet> paquet);
+        static void PaquetInstruction(FPL::Data::Data &data, std::optional<FPL::Paquet::Paquet> paquet);
     };
 }

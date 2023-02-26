@@ -2,7 +2,7 @@
 
 namespace FPL::Parser {
 
-    void Parser::PaquetInstruction(FPL::Data::Data& data, const std::optional<FPL::FonctionDef>& fonction, std::optional<FPL::Paquet::Paquet> paquet) {
+    void Parser::PaquetInstruction(FPL::Data::Data &data, std::optional<FPL::Paquet::Paquet> paquet) {
         auto nomPaquet = ExpectIdentifiant(data);
         if (nomPaquet.has_value()) {
             FPL::Paquet::Paquet Paquet;
@@ -125,15 +125,7 @@ namespace FPL::Parser {
         if (possibleFunctionName.has_value()) {
             auto fonction = data.getFonction(possibleFunctionName->TokenText);
 
-            std::stringstream FonctionContentCode_STR;
-            for (auto it = fonction->FonctionContentCode.begin(); it != fonction->FonctionContentCode.end(); it++)    {
-                if (it != fonction->FonctionContentCode.begin()) {
-                    FonctionContentCode_STR << " ";
-                }
-                FonctionContentCode_STR << *it;
-            }
-
-            std::vector<Tokenizer::Token> FileCode_Tokens = FPL::Tokenizer::TokenBuilder::ParseToken(FonctionContentCode_STR.str());
+            std::vector<Tokenizer::Token> FileCode_Tokens = FPL::Tokenizer::TokenBuilder::ParseToken(FPL::Instruction::FunctionUtils::ReturnStringVector(fonction->FonctionContentCode));
 
             if (fonction->FonctionNumberArgument < 1) {
                 if (!ExpectOperator(data, ";").has_value()) {
@@ -263,6 +255,7 @@ namespace FPL::Parser {
                         if (currentToken->TokenType == FPL::Tokenizer::CHAINE_LITTERAL) {
                             currentToken->TokenText = "\"" + currentToken->TokenText += "\"";
                         }
+
                         fonction.FonctionContentCode.push_back(currentToken->TokenText);
                         data.incrementeTokens(data);
 
@@ -273,6 +266,9 @@ namespace FPL::Parser {
                             } else {
                                 break;
                             }
+                        } else if (data.current_token == data.end_token) {
+                            fonction.FonctionContentCode.emplace_back("}");
+                            break;
                         }
                     }
 
@@ -541,7 +537,7 @@ namespace FPL::Parser {
                                                       variable.VariableType,
                                                       variable.NeedDelete,
                                                       variable.IsGlobal
-                                                      );
+                                );
                             } else {
                                 forgotEndInstructionOperator(data);
                             }
@@ -556,15 +552,7 @@ namespace FPL::Parser {
                                 auto possibleFunction = data.getFonction(possibleId->TokenText);
                                 if (possibleFunction.has_value()) {
 
-                                    std::stringstream FonctionContentCode_STR;
-                                    for (auto it = possibleFunction->FonctionContentCode.begin(); it != possibleFunction->FonctionContentCode.end(); it++)    {
-                                        if (it != possibleFunction->FonctionContentCode.begin()) {
-                                            FonctionContentCode_STR << " ";
-                                        }
-                                        FonctionContentCode_STR << *it;
-                                    }
-
-                                    std::vector<Tokenizer::Token> FileCode_Tokens = FPL::Tokenizer::TokenBuilder::ParseToken(FonctionContentCode_STR.str());
+                                    std::vector<Tokenizer::Token> FileCode_Tokens = FPL::Tokenizer::TokenBuilder::ParseToken(FPL::Instruction::FunctionUtils::ReturnStringVector(possibleFunction->FonctionContentCode));
 
                                     if (ExpectOperator(data, ":").has_value() && possibleFunction->FonctionNumberArgument > 0) {
                                         int totalArgs = possibleFunction->FonctionNumberArgument;
@@ -776,7 +764,7 @@ namespace FPL::Parser {
                 ImporterInstruction(data, fonction);
                 return true;
             }else if (Instruction->TokenText == "paquet") {
-                PaquetInstruction(data, fonction, paquet);
+                PaquetInstruction(data, paquet);
                 return true;
             }
         }
