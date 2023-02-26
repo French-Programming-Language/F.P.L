@@ -1,11 +1,7 @@
-definir a () {
-    definir b() {
-        definir c() {
-                envoyer "cc";
-        }
-        appeler c;
+paquet Info {
+    paquet a {
+        variable entier a -> 10;
     }
-    appeler b;
 }
 
-appeler a;
+envoyer "cc";
