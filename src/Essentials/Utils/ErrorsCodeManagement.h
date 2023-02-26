@@ -39,3 +39,4 @@ void RETURN_wrongtype(FPL::Data::Data& data);
 void IMPORT_needfilename(FPL::Data::Data& data);
 void PAQUET_forgotname(FPL::Data::Data& data);
 void PAQUET_open(FPL::Data::Data& data);
+void PAQUET_close(FPL::Data::Data& data);

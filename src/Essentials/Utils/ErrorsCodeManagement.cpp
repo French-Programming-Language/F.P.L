@@ -219,5 +219,11 @@ void PAQUET_forgotname(FPL::Data::Data& data) {
 void PAQUET_open(FPL::Data::Data& data) {
     std::cerr << "Vous devez ouvrir les '{' pour mettre votre code, ligne "
               << data.current_token->TokenLineNumber << "." << std::endl;
-    exit(36);
+    exit(37);
+}
+
+void PAQUET_close(FPL::Data::Data& data) {
+    std::cerr << "Vous devez fermer l'introduction du code avec '}' pour mettre votre code, ligne "
+              << data.current_token->TokenLineNumber << "." << std::endl;
+    exit(38);
 }
