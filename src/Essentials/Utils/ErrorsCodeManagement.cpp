@@ -201,11 +201,23 @@ void RETURN_noreturn(FPL::Data::Data& data) {
 void RETURN_wrongtype(FPL::Data::Data& data) {
     std::cerr << "Les types doivent etre les meme et non differents, ligne "
               << data.current_token->TokenLineNumber << "." << std::endl;
-    exit(33);
+    exit(34);
 }
 
 void IMPORT_needfilename(FPL::Data::Data& data) {
     std::cerr << "Vous devez donner le nom du fichier entre guillements : '\"', ligne "
               << data.current_token->TokenLineNumber << "." << std::endl;
-    exit(33);
+    exit(35);
+}
+
+void PAQUET_forgotname(FPL::Data::Data& data) {
+    std::cerr << "Vous devez donner a nom a votre paquet, ligne "
+              << data.current_token->TokenLineNumber << "." << std::endl;
+    exit(36);
+}
+
+void PAQUET_open(FPL::Data::Data& data) {
+    std::cerr << "Vous devez ouvrir les '{' pour mettre votre code, ligne "
+              << data.current_token->TokenLineNumber << "." << std::endl;
+    exit(36);
 }

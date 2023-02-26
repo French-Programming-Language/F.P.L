@@ -37,3 +37,5 @@ void RETURN_novariablefound(FPL::Data::Data& data);
 void RETURN_noreturn(FPL::Data::Data& data);
 void RETURN_wrongtype(FPL::Data::Data& data);
 void IMPORT_needfilename(FPL::Data::Data& data);
+void PAQUET_forgotname(FPL::Data::Data& data);
+void PAQUET_open(FPL::Data::Data& data);
