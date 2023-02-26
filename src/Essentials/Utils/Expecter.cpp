@@ -15,9 +15,12 @@ std::optional<Token> ExpectIdentifiant(FPL::Data::Data &data, std::string_view n
 }
 
 std::optional<Token> ExpectOperator(FPL::Data::Data &data, std::string_view name) {
-    if (data.current_token == data.end_token) { return std::nullopt; }
-    if (data.current_token->TokenType != Tokenizer::OPERATEUR) { return std::nullopt; }
-    if (data.current_token->TokenText != name && !name.empty()) { return std::nullopt; }
+    if (data.current_token == data.end_token || data.current_token->TokenType != Tokenizer::OPERATEUR) {
+        return std::nullopt;
+    }
+    if (!name.empty() && data.current_token->TokenText != name) {
+        return std::nullopt;
+    }
 
     auto returnToken = data.current_token;
     data.current_token++;
