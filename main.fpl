@@ -1,6 +1,12 @@
-definir main () {
-    renvoyer "cc";
+paquet User {
+    variable entier age -> 18;
+    variable texte nom -> "Program";
+
+    paquet InfoPers {
+        variable texte tel -> "00000000";
+    }
 }
 
-variable texte fonction a -> main;
-envoyer a;
+envoyer User.age;
+envoyer User.nom;
+envoyer User.InfoPers.tel;
