@@ -17,6 +17,7 @@
 
 #include "Definitions/Variables.h"
 #include "Definitions/Fonction.h"
+#include "Definitions/Paquet.h"
 
 #include "../Instructions/Prints.h"
 #include "../Instructions/Inputs.h"
@@ -30,21 +31,22 @@ namespace FPL::Parser {
 
 
     private:
-        static Data::Data ParserCode_Func(std::vector<FPL::Tokenizer::Token>& Tokens, std::optional<FPL::FonctionDef>& fonction);
-        static bool ManagerInstruction(FPL::Data::Data &data, std::optional<FPL::FonctionDef> fonction);
+        static Data::Data executeContentCode(std::vector<FPL::Tokenizer::Token>& Tokens, const std::optional<FPL::FonctionDef>& fonction, std::optional<FPL::Paquet::Paquet> paquet);
+        static bool ManagerInstruction(FPL::Data::Data &data, std::optional<FPL::FonctionDef> fonction, const std::optional<FPL::Paquet::Paquet>& paquet);
 
         static void PrintInstruction(FPL::Data::Data& data, std::optional<FPL::FonctionDef>& fonction);
-        static void VariableInstruction(FPL::Data::Data& data, std::optional<FPL::FonctionDef>& fonction);
+        static void VariableInstruction(FPL::Data::Data& data, std::optional<FPL::FonctionDef>& fonction, const std::optional<FPL::Paquet::Paquet>& paquet);
         static void ChangerInstruction(FPL::Data::Data& data);
         static void InputInstruction(FPL::Data::Data& data);
-        static void MathInstruction(FPL::Data::Data& data);
+        static void MathInstruction(FPL::Data::Data& data, std::optional<FPL::Paquet::Paquet> paquet);
         static void ConversionInstruction(FPL::Data::Data& data);
 
         static void ImporterInstruction(FPL::Data::Data& data, std::optional<FPL::FonctionDef> fonction);
-        static Data::Data ParserCode_Import(std::vector<FPL::Tokenizer::Token>& Tokens, std::optional<FPL::FonctionDef>& fonction);
 
-        static void DefinirInstruction(FPL::Data::Data& data);
+        static void DefinirInstruction(FPL::Data::Data& data, std::optional<FPL::Paquet::Paquet> paquet);
         static void AppelerInstruction(FPL::Data::Data& data);
         static void RenvoyerInstruction(FPL::Data::Data& data, std::optional<FPL::FonctionDef> fonction);
+
+        static void PaquetInstruction(FPL::Data::Data& data, const std::optional<FPL::FonctionDef>& fonction, std::optional<FPL::Paquet::Paquet> paquet);
     };
 }

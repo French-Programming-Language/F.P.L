@@ -2,6 +2,50 @@
 
 namespace FPL::Parser {
 
+    void Parser::PaquetInstruction(FPL::Data::Data& data, const std::optional<FPL::FonctionDef>& fonction, std::optional<FPL::Paquet::Paquet> paquet) {
+        auto nomPaquet = ExpectIdentifiant(data);
+        if (nomPaquet.has_value()) {
+            FPL::Paquet::Paquet Paquet;
+            if (paquet.has_value()) {
+                Paquet.PaquetName = paquet->PaquetName + "." + nomPaquet->TokenText;
+            } else{
+                Paquet.PaquetName = nomPaquet->TokenText;
+            }
+            if (ExpectOperator(data, "{").has_value()) {
+                int totalInstructionInDefinition = 0;
+
+                while (data.current_token != data.end_token) {
+                    auto currentToken = data.current_token;
+                    if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet") {
+                        totalInstructionInDefinition += 1;
+                    }
+
+                    if (currentToken->TokenType == FPL::Tokenizer::CHAINE_LITTERAL) {
+                        currentToken->TokenText = "\"" + currentToken->TokenText += "\"";
+                    }
+
+                    Paquet.PaquetContent.push_back(currentToken->TokenText);
+                    data.incrementeTokens(data);
+
+                    if (currentToken->TokenText == "}") {
+                        if (totalInstructionInDefinition > 0) {
+                            Paquet.PaquetContent.emplace_back("}");
+                            totalInstructionInDefinition -= 1;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+
+            } else {
+                PAQUET_open(data);
+            }
+        } else {
+            PAQUET_forgotname(data);
+        }
+    }
+
     void Parser::ImporterInstruction(FPL::Data::Data& data, std::optional<FPL::FonctionDef> fonction) {
         auto possibleFileName = ExpectValue(data);
         if (possibleFileName.has_value() && possibleFileName->StatementType.Type == Types::STRING) {
@@ -17,7 +61,7 @@ namespace FPL::Parser {
 
             std::string Import_ContentCode((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
             std::vector<Tokenizer::Token> ImportFile_Tokens = FPL::Tokenizer::TokenBuilder::ParseToken(Import_ContentCode);
-            auto data_ImportFile = ParserCode_Import(ImportFile_Tokens, fonction);
+            auto data_ImportFile = executeContentCode(ImportFile_Tokens, fonction, std::nullopt);
 
             for (auto const& variables : data_ImportFile.Map_Variables) {
                 auto it = std::find(data_ImportFile.Map_Variables.begin(), data_ImportFile.Map_Variables.end(), variables);
@@ -149,7 +193,7 @@ namespace FPL::Parser {
                 forgotEndInstructionOperator(data);
             }
 
-            auto data_f = ParserCode_Func(FileCode_Tokens, fonction);
+            auto data_f = executeContentCode(FileCode_Tokens, fonction, std::nullopt);
 
             for (auto const& variables : data_f.Map_Variables) {
                 auto it = std::find(data_f.Map_Variables.begin(), data_f.Map_Variables.end(), variables);
@@ -168,7 +212,7 @@ namespace FPL::Parser {
         }
     }
 
-    void Parser::DefinirInstruction(FPL::Data::Data& data) {
+    void Parser::DefinirInstruction(FPL::Data::Data& data, std::optional<FPL::Paquet::Paquet> paquet) {
         auto FonctionPossibleName = ExpectIdentifiant(data);
         if (FonctionPossibleName.has_value()) {
             FonctionDef fonction;
@@ -212,7 +256,7 @@ namespace FPL::Parser {
 
                     while (true) {
                         auto currentToken = data.current_token;
-                        if (currentToken->TokenText == "definir") {
+                        if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet") {
                             totalInstructionInDefinition += 1;
                         }
 
@@ -230,7 +274,6 @@ namespace FPL::Parser {
                                 break;
                             }
                         }
-
                     }
 
                     data.Map_Fonctions[fonction.FonctionName] = fonction;
@@ -289,7 +332,7 @@ namespace FPL::Parser {
         }
     }
 
-    void Parser::MathInstruction(FPL::Data::Data& data) {
+    void Parser::MathInstruction(FPL::Data::Data& data, std::optional<FPL::Paquet::Paquet> paquet) {
         auto possibleName = ExpectIdentifiant(data);
         if (possibleName.has_value()) {
             if (ExpectEgalOperators(data)) {
@@ -451,7 +494,7 @@ namespace FPL::Parser {
         }
     }
 
-    void Parser::VariableInstruction(FPL::Data::Data &data, std::optional<FPL::FonctionDef>& fonction) {
+    void Parser::VariableInstruction(FPL::Data::Data &data, std::optional<FPL::FonctionDef>& fonction, const std::optional<FPL::Paquet::Paquet>& paquet) {
         auto possibleType = ExpectType(data);
         if (possibleType.has_value()) {
             VariableDef variable;
@@ -578,7 +621,7 @@ namespace FPL::Parser {
                                         forgotEndInstructionOperator(data);
                                     }
 
-                                    auto data_f = ParserCode_Func(FileCode_Tokens, possibleFunction);
+                                    auto data_f = executeContentCode(FileCode_Tokens, possibleFunction, std::nullopt);
 
                                     if (!data_f.HasReturnValue) {
                                         RETURN_noreturn(data);
@@ -699,14 +742,14 @@ namespace FPL::Parser {
 
 
 
-    bool Parser::ManagerInstruction(FPL::Data::Data &data, std::optional<FPL::FonctionDef> fonction) {
+    bool Parser::ManagerInstruction(FPL::Data::Data &data, std::optional<FPL::FonctionDef> fonction, const std::optional<FPL::Paquet::Paquet>& paquet) {
         auto Instruction = ExpectIdentifiant(data);
         if (Instruction.has_value()) {
             if (Instruction->TokenText == "envoyer") {
                 PrintInstruction(data, fonction);
                 return true;
             } else if (Instruction->TokenText == "variable") {
-                VariableInstruction(data, fonction);
+                VariableInstruction(data, fonction, paquet);
                 return true;
             } else if (Instruction->TokenText == "changer") {
                 ChangerInstruction(data);
@@ -715,13 +758,13 @@ namespace FPL::Parser {
                 InputInstruction(data);
                 return true;
             } else if (Instruction->TokenText == "math") {
-                MathInstruction(data);
+                MathInstruction(data, paquet);
                 return true;
             } else if (Instruction->TokenText == "convertir") {
                 ConversionInstruction(data);
                 return true;
             } else if (Instruction->TokenText == "definir") {
-                DefinirInstruction(data);
+                DefinirInstruction(data, paquet);
                 return true;
             } else if (Instruction->TokenText == "appeler") {
                 AppelerInstruction(data);
@@ -732,37 +775,19 @@ namespace FPL::Parser {
             } else if (Instruction->TokenText == "importer") {
                 ImporterInstruction(data, fonction);
                 return true;
+            }else if (Instruction->TokenText == "paquet") {
+                PaquetInstruction(data, fonction, paquet);
+                return true;
             }
         }
         return false;
     }
 
-    Data::Data Parser::ParserCode_Import(std::vector<FPL::Tokenizer::Token>& Tokens, std::optional<FPL::FonctionDef>& fonction) {
+    Data::Data Parser::executeContentCode(std::vector<FPL::Tokenizer::Token>& Tokens, const std::optional<FPL::FonctionDef>& fonction, std::optional<FPL::Paquet::Paquet> paquet) {
         Data::Data data(Tokens);
 
         while (data.current_token != data.end_token) {
-            if (ManagerInstruction(data, fonction)) {
-
-            } else {
-                if (data.current_token->TokenText.empty()
-                    || data.current_token->TokenType == FPL::Tokenizer::ESPACE_VIDE
-                    || data.current_token->TokenText == " ") {
-                    continue;
-                }
-
-                std::cerr << "Identifier inconnu : " << data.current_token->TokenText << " : "
-                          << data.current_token->TokenLineNumber << std::endl;
-                ++data.current_token;
-            }
-        }
-        return data;
-    }
-
-    Data::Data Parser::ParserCode_Func(std::vector<FPL::Tokenizer::Token>& Tokens, std::optional<FPL::FonctionDef>& fonction) {
-        Data::Data data(Tokens);
-
-        while (data.current_token != data.end_token) {
-            if (ManagerInstruction(data, fonction)) {
+            if (ManagerInstruction(data, fonction, paquet)) {
 
             } else {
                 if (data.current_token->TokenText.empty()
@@ -783,7 +808,7 @@ namespace FPL::Parser {
         Data::Data data(Tokens);
 
         while (data.current_token != data.end_token) {
-            if (ManagerInstruction(data, std::nullopt)) {
+            if (ManagerInstruction(data, std::nullopt, std::nullopt)) {
 
             } else {
                 if (data.current_token->TokenText.empty()
