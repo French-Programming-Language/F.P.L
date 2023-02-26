@@ -2,15 +2,17 @@
 
 namespace FPL::Parser {
 
-    void Parser::PaquetInstruction(FPL::Data::Data &data, std::optional<FPL::Paquet::Paquet> paquet) {
+    void Parser::PaquetInstruction(FPL::Data::Data &data, std::optional<FPL::FonctionDef> fonction, std::optional<FPL::Paquet::Paquet> paquet) {
         auto nomPaquet = ExpectIdentifiant(data);
         if (nomPaquet.has_value()) {
             FPL::Paquet::Paquet Paquet;
+
             if (paquet.has_value()) {
                 Paquet.PaquetName = paquet->PaquetName + "." + nomPaquet->TokenText;
             } else{
                 Paquet.PaquetName = nomPaquet->TokenText;
             }
+
             if (ExpectOperator(data, "{").has_value()) {
                 int totalInstructionInDefinition = 0;
 
@@ -24,20 +26,36 @@ namespace FPL::Parser {
                         currentToken->TokenText = "\"" + currentToken->TokenText += "\"";
                     }
 
-                    Paquet.PaquetContent.push_back(currentToken->TokenText);
-                    data.incrementeTokens(data);
-
                     if (currentToken->TokenText == "}") {
                         if (totalInstructionInDefinition > 0) {
-                            Paquet.PaquetContent.emplace_back("}");
                             totalInstructionInDefinition -= 1;
                         } else {
                             break;
                         }
                     }
+
+                    Paquet.PaquetContent.push_back(currentToken->TokenText);
+                    data.incrementeTokens(data);
                 }
 
+                if (!ExpectOperator(data, "}").has_value()) {
+                    PAQUET_close(data);
+                }
 
+                std::vector<Tokenizer::Token> FileCode_Tokens = FPL::Tokenizer::TokenBuilder::ParseToken(FPL::Instruction::FunctionUtils::ReturnStringVector(Paquet.PaquetContent));
+
+                auto data_paquet = executeContentCode(FileCode_Tokens, fonction, Paquet);
+
+                for (auto const& variables : data_paquet.Map_Variables) {
+                    auto it = std::find(data_paquet.Map_Variables.begin(), data_paquet.Map_Variables.end(), variables);
+                    if (it != data_paquet.Map_Variables.end()) {
+                        data.addVariableToMap(it->second.VariableName,
+                                              it->second.VariableValue,
+                                              it->second.VariableType,
+                                              it->second.NeedDelete,
+                                              it->second.IsGlobal);
+                    }
+                }
             } else {
                 PAQUET_open(data);
             }
@@ -510,7 +528,11 @@ namespace FPL::Parser {
                     possibleVariableName = ExpectIdentifiant(data);
                 }
 
-                variable.VariableName = possibleVariableName->TokenText;
+                if (paquet.has_value()) {
+                    variable.VariableName = paquet->PaquetName + "." + possibleVariableName->TokenText;
+                } else {
+                    variable.VariableName = possibleVariableName->TokenText;
+                }
 
                 if (ExpectEgalOperators(data)) {
                     if (fonction.has_value() && !variable.IsGlobal) { variable.NeedDelete = true; }
@@ -764,7 +786,7 @@ namespace FPL::Parser {
                 ImporterInstruction(data, fonction);
                 return true;
             }else if (Instruction->TokenText == "paquet") {
-                PaquetInstruction(data, paquet);
+                PaquetInstruction(data, fonction, paquet);
                 return true;
             }
         }
