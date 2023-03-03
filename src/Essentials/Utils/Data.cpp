@@ -39,6 +39,11 @@ namespace FPL::Data {
         Map_Variables[newVariable.VariableName] = newVariable;
     }
 
+    void Data::addFunctionToMap(std::string& name, FPL::Types::Types& type, std::map<std::string, FonctionArgumentDef>& AllFArgs, std::vector<std::string>& Code, int& nArgs, std::string& ReturnValue) {
+        FonctionDef fonction(name, type, AllFArgs, Code, nArgs, ReturnValue);
+        Map_Fonctions[fonction.FonctionName] = fonction;
+    }
+
     bool Data::isVariable(std::string& name) const {
         if (Map_Variables.contains(name)) { return true; }
         return false;

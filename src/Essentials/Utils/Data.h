@@ -36,6 +36,7 @@ namespace FPL::Data {
         void updateType(std::string& name, std::string& TypeName, Types::BUILTIN_TYPE Type);
 
         std::optional<FPL::FonctionDef> getFonction(std::string& name);
+        void addFunctionToMap(std::string& name, FPL::Types::Types& type, std::map<std::string, FonctionArgumentDef>& AllFArgs, std::vector<std::string>& Code, int& nArgs, std::string& ReturnValue);
         bool HasReturnValue = false;
         std::string ReturnValue = "N/A";
         Types::Types ReturnType;
