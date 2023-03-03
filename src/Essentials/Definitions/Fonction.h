@@ -24,6 +24,9 @@ namespace FPL {
 
     class FonctionDef {
     public:
+        FonctionDef();
+        FonctionDef(std::string name, Types::Types type, std::map<std::string, FonctionArgumentDef> allArgs, std::vector<std::string> code, int nArgs, std::string returnV);
+
         std::string FonctionName;
         Types::Types FonctionType;
         std::map<std::string, FonctionArgumentDef> AllFonctionArguments;
@@ -32,6 +35,8 @@ namespace FPL {
         std::string ReturnValue = "N/A";
 
         friend std::ostream& operator<<(std::ostream& flux, FonctionDef const& var);
+        friend bool operator==(const FonctionDef &v1, const FonctionDef &v2);
+        friend bool operator!=(const FonctionDef &v1, const FonctionDef &v2);
 
         bool isArgument(std::string const& argument);
         std::optional<FonctionArgumentDef> getArgument(std::string const& argument);

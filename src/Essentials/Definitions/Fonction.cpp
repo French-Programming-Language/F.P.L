@@ -30,4 +30,24 @@ namespace FPL {
     bool operator==(FonctionArgumentDef const& arg1, FonctionArgumentDef const& arg2) {
         return arg1.ArgumentName == arg2.ArgumentName;
     }
+
+    bool operator==(const FonctionDef &v1, const FonctionDef &v2) {
+        return v1.FonctionName == v2.FonctionName;
+    }
+
+    bool operator!=(const FonctionDef &v1, const FonctionDef &v2) {
+        return v1.FonctionName != v2.FonctionName;
+    }
+
+    FonctionDef::FonctionDef(std::string name, Types::Types type, std::map<std::string, FonctionArgumentDef> allArgs,
+                             std::vector<std::string> code, int nArgs, std::string returnV) {
+        this->FonctionName = name;
+        this->FonctionType = type;
+        this->AllFonctionArguments = allArgs;
+        this->FonctionContentCode = code;
+        this->FonctionNumberArgument = nArgs;
+        this->ReturnValue = returnV;
+    }
+
+    FonctionDef::FonctionDef() {}
 }
