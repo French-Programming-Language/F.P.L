@@ -44,7 +44,7 @@ namespace FPL::Parser {
 
                 std::vector<Tokenizer::Token> FileCode_Tokens = FPL::Tokenizer::TokenBuilder::ParseToken(FPL::Instruction::FunctionUtils::ReturnStringVector(Paquet.PaquetContent));
 
-                auto data_paquet = executeContentCode(FileCode_Tokens, fonction, Paquet);
+                auto data_paquet = executeContentCode(FileCode_Tokens, fonction, Paquet, data);
 
                 for (auto const& variables : data_paquet.Map_Variables) {
                     auto it = std::find(data_paquet.Map_Variables.begin(), data_paquet.Map_Variables.end(), variables);
@@ -91,7 +91,7 @@ namespace FPL::Parser {
 
             std::string Import_ContentCode((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
             std::vector<Tokenizer::Token> ImportFile_Tokens = FPL::Tokenizer::TokenBuilder::ParseToken(Import_ContentCode);
-            auto data_ImportFile = executeContentCode(ImportFile_Tokens, fonction, std::nullopt);
+            auto data_ImportFile = executeContentCode(ImportFile_Tokens, fonction, std::nullopt, data);
 
             for (auto const& variables : data_ImportFile.Map_Variables) {
                 auto it = std::find(data_ImportFile.Map_Variables.begin(), data_ImportFile.Map_Variables.end(), variables);
@@ -227,7 +227,7 @@ namespace FPL::Parser {
                 forgotEndInstructionOperator(data);
             }
 
-            auto data_f = executeContentCode(FileCode_Tokens, fonction, std::nullopt);
+            auto data_f = executeContentCode(FileCode_Tokens, fonction, std::nullopt, data);
 
             for (auto const& variables : data_f.Map_Variables) {
                 auto it = std::find(data_f.Map_Variables.begin(), data_f.Map_Variables.end(), variables);
@@ -674,7 +674,7 @@ namespace FPL::Parser {
                                         forgotEndInstructionOperator(data);
                                     }
 
-                                    auto data_f = executeContentCode(FileCode_Tokens, possibleFunction, std::nullopt);
+                                    auto data_f = executeContentCode(FileCode_Tokens, possibleFunction, std::nullopt, data);
 
                                     if (!data_f.HasReturnValue) {
                                         RETURN_noreturn(data);
@@ -836,8 +836,19 @@ namespace FPL::Parser {
         return false;
     }
 
-    Data::Data Parser::executeContentCode(std::vector<FPL::Tokenizer::Token>& Tokens, const std::optional<FPL::FonctionDef>& fonction, const std::optional<FPL::Paquet::Paquet>& paquet) {
+    Data::Data Parser::executeContentCode(std::vector<FPL::Tokenizer::Token>& Tokens, const std::optional<FPL::FonctionDef>& fonction, const std::optional<FPL::Paquet::Paquet>& paquet, FPL::Data::Data& universalData) {
         Data::Data data(Tokens);
+
+        for (auto const& v : universalData.Map_Variables) {
+            auto it = std::find(universalData.Map_Variables.begin(), universalData.Map_Variables.end(), v);
+            if (it != universalData.Map_Variables.end()) {
+                data.addVariableToMap(it->second.VariableName,
+                                      it->second.VariableValue,
+                                      it->second.VariableType,
+                                      it->second.NeedDelete,
+                                      it->second.IsGlobal);
+            }
+        }
 
         while (data.current_token != data.end_token) {
             if (ManagerInstruction(data, fonction, paquet)) {
