@@ -1,33 +1,8 @@
-paquet User {
-    definir getName () {
-        paquet Info {
-            variable entier age -> 17;
-        }
-        envoyer Info.age;
-        renvoyer "Program";
+definir a () {
+    variable entier i -> 0;
+    definir b () {
+        envoyer i;
     }
+    appeler b;
 }
-variable texte fonction aaa -> User.getName;
-envoyer aaa;
-
-paquet Maths {
-    math a -> 5 + 5 - 5;
-    math b -> 10 - 5;
-}
-
-convertir Maths.a entier;
-convertir Maths.b entier;
-
-envoyer Maths.a ", " Maths.b;
-envoyer Maths.a = 5;
-envoyer Maths.b = 5;
-
-paquet Info {
-    saisir entier a -> "Yo donne moi ton age : ";
-    saisir texte b -> "Yo donne moi ton pseudo : ";
-    saisir texte c -> "Yo donne moi ta CB :> : ";
-}
-
-envoyer Info.a;
-envoyer Info.b;
-envoyer Info.c;
+appeler a;
