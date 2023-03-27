@@ -2,6 +2,79 @@
 
 namespace FPL::Parser {
 
+    void Parser::FichierInstruction(Data::Data &data, std::optional<FPL::Paquet::Paquet> paquet) {
+        auto possibleArg = ExpectIdentifiant(data);
+        if (possibleArg.has_value() && possibleArg->TokenText == "lire") {
+            auto possibleVariable = ExpectIdentifiant(data);
+            if (possibleVariable.has_value()) {
+                auto possibleFileName = ExpectValue(data);
+
+                if (possibleFileName.has_value() && possibleFileName->StatementType.Type == Types::STRING) {
+                    std::ifstream file { possibleFileName->StatementName};
+                    if (!file) { FICHIER_fileunknow(data); }
+                    std::string fileContent((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
+
+                    if (data.isVariable(possibleVariable->TokenText)) {
+                        std::optional<VariableDef> var = data.getVariable(possibleVariable->TokenText);
+                        if (var.has_value()) {
+                            data.updateValue(var->VariableName, fileContent);
+                        } else {
+                            FICHIER_varunknow(data);
+                        }
+                    } else {
+                        VariableDef newVar;
+                        if (paquet.has_value()) {
+                            newVar.VariableName = paquet->PaquetName + "." + possibleVariable->TokenText;
+                        } else {
+                            newVar.VariableName = possibleVariable->TokenText;
+                        }
+                        newVar.VariableValue = fileContent;
+                        newVar.VariableType = Types::Types("texte", Types::STRING);
+                        newVar.NeedDelete = false;
+                        newVar.IsGlobal = false;
+
+                        data.addVariableToMap(newVar.VariableName,
+                                              newVar.VariableValue,
+                                              newVar.VariableType,
+                                              newVar.NeedDelete,
+                                              newVar.IsGlobal);
+                    }
+
+                    if (!ExpectOperator(data, ";")) {
+                        forgotEndInstructionOperator(data);
+                    }
+                } else {
+                    FICHIER_stringtypetogetfile(data);
+                }
+            } else {
+                FICHIER_needvariable(data);
+            }
+        } else if (possibleArg.has_value() && possibleArg->TokenText == "ecrire") {
+            auto possibleFileName = ExpectValue(data);
+            if (possibleFileName.has_value()) {
+                if (ExpectEgalOperators(data)) {
+                    auto possibleNewContent = ExpectValue(data);
+                    if (possibleNewContent.has_value()) {
+                        std::ofstream file(possibleFileName->StatementName);
+                        if (!file) { FICHIER_fileunknow(data); }
+                        file << possibleNewContent->StatementName;
+                        if (!ExpectOperator(data, ";")) {
+                            forgotEndInstructionOperator(data);
+                        }
+                    } else {
+                        forgotValue(data);
+                    }
+                } else {
+                    forgotEgalOperators(data);
+                }
+            } else{
+                FICHIER_fileunknow(data);
+            }
+        } else {
+            FICHIER_wrongargument(data);
+        }
+    }
+
     void Parser::PaquetInstruction(FPL::Data::Data &data, const std::optional<FPL::FonctionDef>& fonction, std::optional<FPL::Paquet::Paquet> paquet) {
         auto nomPaquet = ExpectIdentifiant(data);
         if (nomPaquet.has_value()) {
@@ -828,8 +901,11 @@ namespace FPL::Parser {
             } else if (Instruction->TokenText == "importer") {
                 ImporterInstruction(data, fonction);
                 return true;
-            }else if (Instruction->TokenText == "paquet") {
+            } else if (Instruction->TokenText == "paquet") {
                 PaquetInstruction(data, fonction, paquet);
+                return true;
+            } else if (Instruction->TokenText == "fichier") {
+                FichierInstruction(data, paquet);
                 return true;
             }
         }
