@@ -227,3 +227,33 @@ void PAQUET_close(FPL::Data::Data& data) {
               << data.current_token->TokenLineNumber << "." << std::endl;
     exit(38);
 }
+
+void FICHIER_fileunknow(FPL::Data::Data& data) {
+    std::cerr << "Fichier non trouve, ligne "
+              << data.current_token->TokenLineNumber << "." << std::endl;
+    exit(39);
+}
+
+void FICHIER_varunknow(FPL::Data::Data& data) {
+    std::cerr << "Variable non trouve, ligne "
+              << data.current_token->TokenLineNumber << "." << std::endl;
+    exit(40);
+}
+
+void FICHIER_wrongargument(FPL::Data::Data& data) {
+    std::cerr << "Mauvais argument pour utiliser 'fichier' en instruction : 'lire' ou 'ecrire', ligne "
+              << data.current_token->TokenLineNumber << "." << std::endl;
+    exit(41);
+}
+
+void FICHIER_stringtypetogetfile(FPL::Data::Data& data) {
+    std::cerr << "Pour recuperer le fichier vous devez le mettre entre '\"' donc de type 'texte' (string), ligne "
+              << data.current_token->TokenLineNumber << "." << std::endl;
+    exit(42);
+}
+
+void FICHIER_needvariable(FPL::Data::Data& data) {
+    std::cerr << "Precisez le nom d'une variable existante ou non, ligne "
+              << data.current_token->TokenLineNumber << "." << std::endl;
+    exit(42);
+}

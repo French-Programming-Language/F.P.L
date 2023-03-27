@@ -40,3 +40,8 @@ void IMPORT_needfilename(FPL::Data::Data& data);
 void PAQUET_forgotname(FPL::Data::Data& data);
 void PAQUET_open(FPL::Data::Data& data);
 void PAQUET_close(FPL::Data::Data& data);
+void FICHIER_fileunknow(FPL::Data::Data& data);
+void FICHIER_varunknow(FPL::Data::Data& data);
+void FICHIER_wrongargument(FPL::Data::Data& data);
+void FICHIER_stringtypetogetfile(FPL::Data::Data& data);
+void FICHIER_needvariable(FPL::Data::Data& data);
