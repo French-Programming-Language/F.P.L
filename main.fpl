@@ -1,8 +1,21 @@
-definir a () {
-    variable entier i -> 0;
-    definir b () {
-        envoyer i;
-    }
-    appeler b;
+fichier ecrire "file" -> "cc!";
+variable texte getContent -> "Yo man !";
+envoyer getContent;
+fichier lire getContent "file";
+envoyer getContent;
+
+fichier lire getContentSecond "file";
+envoyer getContentSecond;
+
+fichier ecrire "file" -> "YO !";
+
+fichier lire getContentSecond "file";
+envoyer getContentSecond;
+
+fichier ecrire "file" -> "Nice";
+
+paquet info {
+    fichier lire getContentSe "file";
 }
-appeler a;
+
+envoyer info.getContentSe;
