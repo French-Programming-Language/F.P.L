@@ -42,7 +42,7 @@ CREATE_ERROR(PAQUET_forgotname, "Vous devez donner a nom a votre paquet, ligne "
 CREATE_ERROR(PAQUET_open, "Vous devez ouvrir les '{' pour mettre votre code, ligne ", 37);
 CREATE_ERROR(PAQUET_close, "Vous devez fermer l'introduction du code avec '}' pour mettre votre code, ligne ", 38);
 CREATE_ERROR(FICHIER_fileunknow, "Fichier non trouve, ligne ", 39);
-CREATE_ERROR(FICHIER_varunknow, "Variable non trouve, ligne ", 40)
-CREATE_ERROR(FICHIER_wrongargument, "Mauvais argument pour utiliser 'fichier' en instruction : 'lire' ou 'ecrire', ligne ", 41)
-CREATE_ERROR(FICHIER_stringtypetogetfile, "Pour recuperer le fichier vous devez le mettre entre '\"' donc de type 'texte' (string), ligne ", 42)
-CREATE_ERROR(FICHIER_needvariable, "Precisez le nom d'une variable existante ou non, ligne ", 42)
+CREATE_ERROR(FICHIER_varunknow, "Variable non trouve, ligne ", 40);
+CREATE_ERROR(FICHIER_wrongargument, "Mauvais argument pour utiliser 'fichier' en instruction : 'lire' ou 'ecrire', ligne ", 41);
+CREATE_ERROR(FICHIER_stringtypetogetfile, "Pour recuperer le fichier vous devez le mettre entre '\"' donc de type 'texte' (string), ligne ", 42);
+CREATE_ERROR(FICHIER_needvariable, "Precisez le nom d'une variable existante ou non, ligne ", 42);
