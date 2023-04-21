@@ -652,7 +652,7 @@ namespace FPL::Parser {
 
                 if (ExpectEgalOperators(data)) {
                     if (fonction.has_value() && !variable.IsGlobal) { variable.NeedDelete = true; }
-                    // Si la variable est déclaré dans une fonction, à la fin de l'execution elle sera delete.
+                    // Si la variable est déclaré dans une fonction, à la fin de l'execution, elle sera delete.
 
                     auto possibleValue = ExpectValue(data); // Valeur classique genre 5, 5.2, "salut"
                     if (possibleValue.has_value() && possibleParamVar != "fonction") {
@@ -681,7 +681,7 @@ namespace FPL::Parser {
                             }
                         }
                     }
-                    else { // Pour les variables déjà déclaré ou le type bool + pour les returns
+                    else { // Pour les variables déjà déclarées ou le type bool + pour les returns
                         auto possibleId = ExpectIdentifiant(data);
                         if (possibleId.has_value()) {
                             if (possibleParamVar == "fonction") {
