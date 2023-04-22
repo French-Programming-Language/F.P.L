@@ -53,5 +53,7 @@ namespace FPL::Parser {
         static void PaquetInstruction(FPL::Data::Data &data, const std::optional<FPL::FonctionDef>& fonction, std::optional<FPL::Paquet::Paquet> paquet);
 
         static void FichierInstruction(FPL::Data::Data &data, std::optional<FPL::Paquet::Paquet> paquet);
+
+        static void TypeInstruction(FPL::Data::Data &data, std::optional<FPL::Paquet::Paquet> paquet);
     };
 }

@@ -2,6 +2,62 @@
 
 namespace FPL::Parser {
 
+    void Parser::TypeInstruction(FPL::Data::Data &data, std::optional<FPL::Paquet::Paquet> paquet) {
+        auto possibleParam = ExpectIdentifiant(data);
+        if (possibleParam.has_value()) {
+            if (possibleParam->TokenText == "nouveau") {
+                auto possibleType = ExpectType(data);
+                if (possibleType.has_value()) {
+                    if (ExpectOperator(data, "-").has_value()) {
+                        if (ExpectOperator(data, ">").has_value()) {
+                            auto possibleNameType = ExpectValue(data);
+                            if (possibleNameType.has_value()) {
+                                if (possibleNameType->StatementType.Type == Types::STRING) {
+                                    if (paquet.has_value()) {
+                                        data.AllFPLTypes[paquet->PaquetName + "." + possibleNameType->StatementName] = FPL::Types::Types(paquet->PaquetName + "." + possibleNameType->StatementName, possibleType->Type);
+                                    } else {
+                                        data.AllFPLTypes[possibleNameType->StatementName] = FPL::Types::Types(possibleNameType->StatementName, possibleType->Type);
+                                    }
+
+                                    if (!ExpectOperator(data, ";").has_value()) {
+                                        forgotEndInstructionOperator(data);
+                                    }
+                                } else {
+                                    TYPE_wrongvalue(data);
+                                }
+                            } else {
+                                TYPE_forgotname(data);
+                            }
+                        } else {
+                            forgotEgalOperators(data);
+                        }
+                    } else {
+                        forgotEgalOperators(data);
+                    }
+                } else {
+                    TYPE_forgotargtype(data);
+                }
+            }
+            else if (possibleParam->TokenText == "supprimer") {
+                auto possibleTypeName = ExpectValue(data);
+                if (possibleTypeName.has_value() && possibleTypeName->StatementType.Type == Types::STRING) {
+                    auto it = data.AllFPLTypes.find(possibleTypeName->StatementName);
+                    data.AllFPLTypes.erase(it);
+
+                    if (!ExpectOperator(data, ";").has_value()) {
+                        forgotEndInstructionOperator(data);
+                    }
+                } else {
+                    TYPE_wrongvalue(data);
+                }
+            } else {
+                TYPE_wrongarg(data);
+            }
+        } else {
+            TYPE_forgotargfirst(data);
+        }
+    }
+
     void Parser::FichierInstruction(Data::Data &data, std::optional<FPL::Paquet::Paquet> paquet) {
         auto possibleArg = ExpectIdentifiant(data);
         if (possibleArg.has_value() && possibleArg->TokenText == "lire") {
@@ -140,6 +196,10 @@ namespace FPL::Parser {
                                               it->second.FonctionNumberArgument,
                                               it->second.ReturnValue);
                     }
+                }
+
+                for (auto const& type : data_paquet.AllFPLTypes) {
+                    data.AllFPLTypes[type.second.Name] = Types::Types(type.second.Name, type.second.Type);
                 }
             } else {
                 PAQUET_open(data);
@@ -659,7 +719,7 @@ namespace FPL::Parser {
                         if (possibleType->Type == Types::BOOL) {
                             BoolNotLikeValue(data);
                         } else {
-                            if (possibleValue->StatementType.Name != possibleType->Name) { // On vérifie si les deux types sont les mêmes
+                            if (possibleValue->StatementType.Type != possibleType->Type) { // On vérifie si les deux types sont les mêmes
                                 differentTypes(data);
                             }
 
@@ -907,6 +967,9 @@ namespace FPL::Parser {
             } else if (Instruction->TokenText == "fichier") {
                 FichierInstruction(data, paquet);
                 return true;
+            } else if (Instruction->TokenText == "type") {
+                TypeInstruction(data, paquet);
+                return true;
             }
         }
         return false;
@@ -925,6 +988,8 @@ namespace FPL::Parser {
                                       it->second.IsGlobal);
             }
         }
+
+        data.AllFPLTypes = universalData.AllFPLTypes;
 
         while (data.current_token != data.end_token) {
             if (ManagerInstruction(data, fonction, paquet)) {
