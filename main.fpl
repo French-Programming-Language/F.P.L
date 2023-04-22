@@ -1,1 +1,6 @@
-envoyer "cc";
+paquet types {
+    type nouveau entier -> "int";
+}
+
+variable types.int a -> 5;
+envoyer a;
