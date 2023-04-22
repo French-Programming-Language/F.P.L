@@ -1,9 +1,9 @@
 #include "ErrorsCodeManagement.h"
 
 #define CREATE_ERROR(func_name, m_error, code) \
-    void func_name (FPL::Data::Data const& data) { std::cerr << m_error << ", ligne " << data.current_token->TokenLineNumber << "." << std::endl; exit(code); }
+    void func_name (FPL::Data::Data const& data) { std::cerr << m_error << data.current_token->TokenLineNumber << "." << std::endl; exit(code); }
 
-CREATE_ERROR(forgotType, "Vous avez oublie de preciser le type, ligne ", 1)
+CREATE_ERROR(forgotType, "Vous avez oublie de preciser un type valide, ligne ", 1)
 CREATE_ERROR(forgotName, "Vous avez oublie de donner un nom, ligne ", 2)
 CREATE_ERROR(forgotEgalOperators, "Vous avez oublie de placer les operateurs '->' pour donner une valeur, ligne ", 3)
 CREATE_ERROR(forgotValue, "Vous avez oublie de donner une valeur, ligne ", 4)
@@ -45,4 +45,9 @@ CREATE_ERROR(FICHIER_fileunknow, "Fichier non trouve, ligne ", 39)
 CREATE_ERROR(FICHIER_varunknow, "Variable non trouve, ligne ", 40)
 CREATE_ERROR(FICHIER_wrongargument, "Mauvais argument pour utiliser 'fichier' en instruction : 'lire' ou 'ecrire', ligne ", 41)
 CREATE_ERROR(FICHIER_stringtypetogetfile, "Pour recuperer le fichier vous devez le mettre entre '\"' donc de type 'texte' (string), ligne ", 42)
-CREATE_ERROR(FICHIER_needvariable, "Precisez le nom d'une variable existante ou non, ligne ", 42)
+CREATE_ERROR(FICHIER_needvariable, "Precisez le nom d'une variable existante ou non, ligne ", 43)
+CREATE_ERROR(TYPE_forgotargfirst, "Precisez si vous voulez ajouter ou supprimer un type non existant de base, ligne ", 44)
+CREATE_ERROR(TYPE_forgotargtype, "Precisez le type sur lequel s'appui votre type, ligne ", 45)
+CREATE_ERROR(TYPE_forgotname, "Precisez le nom de votre type, ligne ", 46)
+CREATE_ERROR(TYPE_wrongvalue, "Le nom de votre type n'est applicable, verifiez si vous avez mis le nom entre '\"' et qu'il ne porte pas le nom d'un type de base, ligne ", 47)
+CREATE_ERROR(TYPE_wrongarg, "Mauvais parametre, ligne ", 48)

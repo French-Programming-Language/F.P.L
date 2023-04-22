@@ -44,3 +44,8 @@ void FICHIER_varunknow(FPL::Data::Data const& data);
 void FICHIER_wrongargument(FPL::Data::Data const& data);
 void FICHIER_stringtypetogetfile(FPL::Data::Data const& data);
 void FICHIER_needvariable(FPL::Data::Data const& data);
+void TYPE_forgotargfirst(FPL::Data::Data const& data);
+void TYPE_forgotargtype(FPL::Data::Data const& data);
+void TYPE_forgotname(FPL::Data::Data const& data);
+void TYPE_wrongvalue(FPL::Data::Data const& data);
+void TYPE_wrongarg(FPL::Data::Data const& data);
