@@ -2,6 +2,172 @@
 
 namespace FPL::Parser {
 
+    void Parser::TantQueInstruction(Data::Data &data, std::optional<FPL::FonctionDef>& fonction) {
+        auto endInstruction = ExpectIdentifiant(data);
+        if (!endInstruction.has_value() || endInstruction->TokenText != "que") {
+            TANTQUE_forgotque(data);
+        }
+
+        auto possibeVariable = ExpectIdentifiant(data);
+        if (possibeVariable.has_value()) {
+            auto possibleOperator = ExpectOperator(data);
+
+            if (possibleOperator.has_value()) {
+                auto possibleValue = ExpectValue(data);
+                if (possibleValue.has_value())  {
+
+                    if (possibleValue->StatementType.Type != Types::INT && possibleValue->StatementType.Type != Types::DOUBLE) {
+                        TANTQUE_wrongtypeforvalue(data);
+                    }
+
+                    auto possibleAction = ExpectIdentifiant(data);
+                    if (possibleAction.has_value()) {
+                        std::string action_tant_que;
+                        std::vector<std::string> Tant_Que_content;
+
+                        if (possibleAction->TokenText == "incrementer") {
+                            action_tant_que = "incrementer";
+                        } else if (possibleAction->TokenText == "decrementer") {
+                            action_tant_que = "decrementer";
+                        } else {
+                            TANTQUE_notfoundaction(data);
+                        }
+
+                        auto numberToAdd = ExpectValue(data);
+
+                        if (!numberToAdd.has_value()) {
+                            forgotValue(data);
+                        }
+
+                        if (numberToAdd->StatementType.Type != Types::INT && numberToAdd->StatementType.Type != Types::DOUBLE) {
+                            TANTQUE_wrongtypeforvalue(data);
+                        }
+
+                        if (ExpectOperator(data, "{").has_value()) {
+                            int totalInstructionInDefinition = 0;
+
+                            while (data.current_token != data.end_token) {
+                                auto currentToken = data.current_token;
+                                if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" || currentToken->TokenText == "paquet") {
+                                    totalInstructionInDefinition += 1;
+                                }
+
+                                if (currentToken->TokenType == FPL::Tokenizer::CHAINE_LITTERAL) {
+                                    currentToken->TokenText = "\"" + currentToken->TokenText += "\"";
+                                }
+
+                                if (currentToken->TokenText == "}") {
+                                    if (totalInstructionInDefinition > 0) {
+                                        totalInstructionInDefinition -= 1;
+                                    } else {
+                                        break;
+                                    }
+                                }
+
+                                Tant_Que_content.push_back(currentToken->TokenText);
+                                data.incrementeTokens(data);
+                            }
+
+                            std::vector<Tokenizer::Token> TantQue_Tokens = FPL::Tokenizer::TokenBuilder::ParseToken(FPL::Instruction::FunctionUtils::ReturnStringVector(Tant_Que_content));
+
+                            if (!ExpectOperator(data, "}").has_value()) {
+                                TANTQUE_closecode(data);
+                            }
+
+                            // Si variable :
+                            if (data.isVariable(possibeVariable->TokenText)) {
+                                auto var = data.getVariable(possibeVariable->TokenText);
+
+                                if (var->VariableType.Type != Types::INT && var->VariableType.Type != Types::DOUBLE)  {
+                                    TANTQUE_wrongtypeforvariable(data);
+                                }
+
+                                if (action_tant_que == "incrementer") {
+                                    if (possibleOperator->TokenText == "<") {
+                                        if (possibleValue->StatementType.Type == Types::INT) {
+                                            int v_int = stringToInt(possibleValue->StatementName, "");
+                                            Instruction::TantQue::increment_int_operatorLowerUpper(var.value(), v_int,
+                                                                                                   data, TantQue_Tokens,
+                                                                                                   fonction);
+                                        } else if (possibleValue->StatementType.Type == Types::DOUBLE) {
+                                            double v_double = stringToDouble(possibleValue->StatementName, "");
+                                            Instruction::TantQue::increment_double_operatorLowerUpper(var.value(),
+                                                                                                      v_double, data,
+                                                                                                      TantQue_Tokens,
+                                                                                                      fonction);
+                                        }
+                                    } else if (possibleOperator->TokenText == ">") {
+                                        if (possibleValue->StatementType.Type == Types::INT) {
+                                            int v_int = stringToInt(possibleValue->StatementName, "");
+                                            Instruction::TantQue::increment_int_operatorUpperLower(var.value(), v_int,
+                                                                                                   data, TantQue_Tokens,
+                                                                                                   fonction);
+                                        } else if (possibleValue->StatementType.Type == Types::DOUBLE) {
+                                            double v_double = stringToDouble(possibleValue->StatementName, "");
+                                            Instruction::TantQue::increment_double_operatorUpperLower(var.value(),
+                                                                                                      v_double, data,
+                                                                                                      TantQue_Tokens,
+                                                                                                      fonction);
+                                        }
+                                    } else {
+                                        TANTQUE_unavailableoperator(data);
+                                    }
+                                } else if (action_tant_que == "decrementer") {
+                                    if (possibleOperator->TokenText == "<") {
+                                        if (possibleValue->StatementType.Type == Types::INT) {
+                                            int v_int = stringToInt(possibleValue->StatementName, "");
+                                            Instruction::TantQue::decrement_int_operatorLowerUpper(var.value(), v_int,
+                                                                                                   data, TantQue_Tokens,
+                                                                                                   fonction);
+                                        } else if (possibleValue->StatementType.Type == Types::DOUBLE) {
+                                            double v_double = stringToDouble(possibleValue->StatementName, "");
+                                            Instruction::TantQue::decrement_double_operatorLowerUpper(var.value(), v_double,
+                                                                                                   data, TantQue_Tokens,
+                                                                                                   fonction);
+                                        }
+                                    } else if (possibleOperator->TokenText == ">") {
+                                        if (possibleValue->StatementType.Type == Types::INT) {
+                                            int v_int = stringToInt(possibleValue->StatementName, "");
+                                            Instruction::TantQue::decrement_int_operatorUpperLower(var.value(), v_int,
+                                                                                                   data, TantQue_Tokens,
+                                                                                                   fonction);
+                                        } else if (possibleValue->StatementType.Type == Types::DOUBLE) {
+                                            double v_double = stringToDouble(possibleValue->StatementName, "");
+                                            Instruction::TantQue::decrement_double_operatorUpperLower(var.value(), v_double,
+                                                                                                      data, TantQue_Tokens,
+                                                                                                      fonction);
+                                        }
+                                    } else {
+                                        TANTQUE_unavailableoperator(data);
+                                    }
+                                }
+                            }
+
+                            // Si argument :
+                            if (fonction.has_value() && fonction->isArgument(possibeVariable->TokenText)) {
+                                auto arg = fonction->getArgument(possibeVariable->TokenText);
+
+                                if (arg->ArgumentType.Type != Types::INT && arg->ArgumentType.Type != Types::DOUBLE)  {
+
+                                }
+                            }
+                        } else {
+                            TANTQUE_opencode(data);
+                        }
+                    } else {
+                        TANTQUE_forgotaction(data);
+                    }
+                } else {
+                    TANTQUE_forgotvalue(data);
+                }
+            } else {
+                TANTQUE_forgotoperators(data);
+            }
+        } else {
+            TANTQUE_forgotvariable(data);
+        }
+    }
+
     void Parser::TypeInstruction(FPL::Data::Data &data, std::optional<FPL::Paquet::Paquet> paquet) {
         auto possibleParam = ExpectIdentifiant(data);
         if (possibleParam.has_value()) {
@@ -147,7 +313,7 @@ namespace FPL::Parser {
 
                 while (data.current_token != data.end_token) {
                     auto currentToken = data.current_token;
-                    if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet") {
+                    if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" || currentToken->TokenText == "paquet") {
                         totalInstructionInDefinition += 1;
                     }
 
@@ -428,7 +594,7 @@ namespace FPL::Parser {
 
                     while (true) {
                         auto currentToken = data.current_token;
-                        if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet") {
+                        if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" || currentToken->TokenText == "paquet") {
                             totalInstructionInDefinition += 1;
                         }
 
@@ -969,6 +1135,9 @@ namespace FPL::Parser {
                 return true;
             } else if (Instruction->TokenText == "type") {
                 TypeInstruction(data, paquet);
+                return true;
+            } else if (Instruction->TokenText == "tant") {
+                TantQueInstruction(data, fonction);
                 return true;
             }
         }
