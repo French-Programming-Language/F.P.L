@@ -1,6 +1,13 @@
-paquet types {
-    type nouveau entier -> "int";
+variable entier i -> 0;
+
+tant que i < 10 incrementer 1 {
+    envoyer "i (1) : " i;
 }
 
-variable types.int a -> 5;
-envoyer a;
+envoyer "Entre deux (2) : " i;
+
+tant que i > 5 decrementer 1 {
+    envoyer "i (3) :" i;
+}
+
+envoyer "La valeur i vaut a la fin : " i;
