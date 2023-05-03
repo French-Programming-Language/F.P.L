@@ -40,4 +40,4 @@ add_executable(French_Programming_Language
         src/Essentials/MathUtils/MathParser/MathParser.h
         src/Essentials/MathUtils/MathParser/Utils/Converts.cpp
         src/Essentials/MathUtils/MathParser/Utils/Converts.h
-        src/Essentials/Definitions/Fonction.cpp src/Essentials/Definitions/Fonction.h src/Essentials/Definitions/Paquet.cpp src/Essentials/Definitions/Paquet.h src/Instructions/FunctionsUtils.cpp src/Instructions/FunctionsUtils.h)
+        src/Essentials/Definitions/Fonction.cpp src/Essentials/Definitions/Fonction.h src/Essentials/Definitions/Paquet.cpp src/Essentials/Definitions/Paquet.h src/Instructions/FunctionsUtils.cpp src/Instructions/FunctionsUtils.h src/Instructions/TantQue_Loop.cpp src/Instructions/TantQue_Loop.h)
