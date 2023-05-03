@@ -24,6 +24,8 @@
 #include "../Instructions/Prints.h"
 #include "../Instructions/Inputs.h"
 #include "../Instructions/FunctionsUtils.h"
+#include "../Instructions/TantQue_Loop.h"
+
 
 #include "MathUtils/MathParser/MathParser.h"
 
@@ -32,9 +34,9 @@ namespace FPL::Parser {
     public:
         static void ParserCode(std::vector<FPL::Tokenizer::Token>& Tokens);
 
+        static Data::Data executeContentCode(std::vector<FPL::Tokenizer::Token>& Tokens, const std::optional<FPL::FonctionDef>& fonction, const std::optional<FPL::Paquet::Paquet>& paquet, FPL::Data::Data& universalData);
 
     private:
-        static Data::Data executeContentCode(std::vector<FPL::Tokenizer::Token>& Tokens, const std::optional<FPL::FonctionDef>& fonction, const std::optional<FPL::Paquet::Paquet>& paquet, FPL::Data::Data& universalData);
         static bool ManagerInstruction(FPL::Data::Data &data, std::optional<FPL::FonctionDef> fonction, const std::optional<FPL::Paquet::Paquet>& paquet);
 
         static void PrintInstruction(FPL::Data::Data& data, std::optional<FPL::FonctionDef>& fonction);
@@ -55,5 +57,7 @@ namespace FPL::Parser {
         static void FichierInstruction(FPL::Data::Data &data, std::optional<FPL::Paquet::Paquet> paquet);
 
         static void TypeInstruction(FPL::Data::Data &data, std::optional<FPL::Paquet::Paquet> paquet);
+
+        static void TantQueInstruction(FPL::Data::Data &data, std::optional<FPL::FonctionDef>& fonction);
     };
 }
