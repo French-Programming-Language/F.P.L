@@ -88,26 +88,30 @@ namespace FPL::Parser {
                                             int v_int = stringToInt(possibleValue->StatementName, "");
                                             Instruction::TantQue::increment_int_operatorLowerUpper(var.value(), v_int,
                                                                                                    data, TantQue_Tokens,
-                                                                                                   fonction);
+                                                                                                   fonction,
+                                                                                                   stringToInt(numberToAdd->StatementName, ""));
                                         } else if (possibleValue->StatementType.Type == Types::DOUBLE) {
                                             double v_double = stringToDouble(possibleValue->StatementName, "");
                                             Instruction::TantQue::increment_double_operatorLowerUpper(var.value(),
                                                                                                       v_double, data,
                                                                                                       TantQue_Tokens,
-                                                                                                      fonction);
+                                                                                                      fonction,
+                                                                                                      stringToDouble(numberToAdd->StatementName, ""));
                                         }
                                     } else if (possibleOperator->TokenText == ">") {
                                         if (possibleValue->StatementType.Type == Types::INT) {
                                             int v_int = stringToInt(possibleValue->StatementName, "");
                                             Instruction::TantQue::increment_int_operatorUpperLower(var.value(), v_int,
                                                                                                    data, TantQue_Tokens,
-                                                                                                   fonction);
+                                                                                                   fonction,
+                                                                                                   stringToInt(numberToAdd->StatementName, ""));
                                         } else if (possibleValue->StatementType.Type == Types::DOUBLE) {
                                             double v_double = stringToDouble(possibleValue->StatementName, "");
                                             Instruction::TantQue::increment_double_operatorUpperLower(var.value(),
                                                                                                       v_double, data,
                                                                                                       TantQue_Tokens,
-                                                                                                      fonction);
+                                                                                                      fonction,
+                                                                                                      stringToDouble(numberToAdd->StatementName, ""));
                                         }
                                     } else {
                                         TANTQUE_unavailableoperator(data);
@@ -118,24 +122,28 @@ namespace FPL::Parser {
                                             int v_int = stringToInt(possibleValue->StatementName, "");
                                             Instruction::TantQue::decrement_int_operatorLowerUpper(var.value(), v_int,
                                                                                                    data, TantQue_Tokens,
-                                                                                                   fonction);
+                                                                                                   fonction,
+                                                                                                   stringToInt(numberToAdd->StatementName, ""));
                                         } else if (possibleValue->StatementType.Type == Types::DOUBLE) {
                                             double v_double = stringToDouble(possibleValue->StatementName, "");
                                             Instruction::TantQue::decrement_double_operatorLowerUpper(var.value(), v_double,
                                                                                                    data, TantQue_Tokens,
-                                                                                                   fonction);
+                                                                                                   fonction,
+                                                                                                   stringToDouble(numberToAdd->StatementName, ""));
                                         }
                                     } else if (possibleOperator->TokenText == ">") {
                                         if (possibleValue->StatementType.Type == Types::INT) {
                                             int v_int = stringToInt(possibleValue->StatementName, "");
                                             Instruction::TantQue::decrement_int_operatorUpperLower(var.value(), v_int,
                                                                                                    data, TantQue_Tokens,
-                                                                                                   fonction);
+                                                                                                   fonction,
+                                                                                                   stringToInt(numberToAdd->StatementName, ""));
                                         } else if (possibleValue->StatementType.Type == Types::DOUBLE) {
                                             double v_double = stringToDouble(possibleValue->StatementName, "");
                                             Instruction::TantQue::decrement_double_operatorUpperLower(var.value(), v_double,
                                                                                                       data, TantQue_Tokens,
-                                                                                                      fonction);
+                                                                                                      fonction,
+                                                                                                      stringToDouble(numberToAdd->StatementName, ""));
                                         }
                                     } else {
                                         TANTQUE_unavailableoperator(data);
