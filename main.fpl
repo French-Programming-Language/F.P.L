@@ -1,13 +1,7 @@
 variable decimal i -> 0.0;
 
-tant que i < 10.0 incrementer 0.5 {
+tant que i < 2 incrementer 0.5 {
     envoyer "i (1) : " i;
-}
-
-envoyer "Entre deux (2) : " i;
-
-tant que i > 5.0 decrementer 0.5 {
-    envoyer "i (3) :" i;
 }
 
 envoyer "La valeur i vaut a la fin : " i;
