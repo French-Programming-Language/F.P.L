@@ -1,12 +1,12 @@
-variable entier i -> 0;
+variable decimal i -> 0.0;
 
-tant que i < 10 incrementer 1 {
+tant que i < 10.0 incrementer 0.5 {
     envoyer "i (1) : " i;
 }
 
 envoyer "Entre deux (2) : " i;
 
-tant que i > 5 decrementer 1 {
+tant que i > 5.0 decrementer 0.5 {
     envoyer "i (3) :" i;
 }
 
