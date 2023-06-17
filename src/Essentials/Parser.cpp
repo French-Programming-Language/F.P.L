@@ -11,11 +11,9 @@ namespace FPL::Parser {
         auto possibeVariable = ExpectIdentifiant(data);
         if (possibeVariable.has_value()) {
             auto possibleOperator = ExpectOperator(data);
-
             if (possibleOperator.has_value()) {
                 auto possibleValue = ExpectValue(data);
                 if (possibleValue.has_value())  {
-
                     if (possibleValue->StatementType.Type != Types::INT && possibleValue->StatementType.Type != Types::DOUBLE) {
                         TANTQUE_wrongtypeforvalue(data);
                     }
@@ -48,7 +46,7 @@ namespace FPL::Parser {
 
                             while (data.current_token != data.end_token) {
                                 auto currentToken = data.current_token;
-                                if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" || currentToken->TokenText == "paquet") {
+                                if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" || currentToken->TokenText == "tant") {
                                     totalInstructionInDefinition += 1;
                                 }
 
@@ -84,13 +82,13 @@ namespace FPL::Parser {
 
                                 if (action_tant_que == "incrementer") {
                                     if (possibleOperator->TokenText == "<") {
-                                        if (possibleValue->StatementType.Type == Types::INT) {
+                                        if (numberToAdd->StatementType.Type == Types::INT) {
                                             int v_int = stringToInt(possibleValue->StatementName, "");
                                             Instruction::TantQue::increment_int_operatorLowerUpper(var.value(), v_int,
                                                                                                    data, TantQue_Tokens,
                                                                                                    fonction,
                                                                                                    stringToInt(numberToAdd->StatementName, ""));
-                                        } else if (possibleValue->StatementType.Type == Types::DOUBLE) {
+                                        } else if (numberToAdd->StatementType.Type == Types::DOUBLE) {
                                             double v_double = stringToDouble(possibleValue->StatementName, "");
                                             Instruction::TantQue::increment_double_operatorLowerUpper(var.value(),
                                                                                                       v_double, data,
@@ -99,13 +97,13 @@ namespace FPL::Parser {
                                                                                                       stringToDouble(numberToAdd->StatementName, ""));
                                         }
                                     } else if (possibleOperator->TokenText == ">") {
-                                        if (possibleValue->StatementType.Type == Types::INT) {
+                                        if (numberToAdd->StatementType.Type == Types::INT) {
                                             int v_int = stringToInt(possibleValue->StatementName, "");
                                             Instruction::TantQue::increment_int_operatorUpperLower(var.value(), v_int,
                                                                                                    data, TantQue_Tokens,
                                                                                                    fonction,
                                                                                                    stringToInt(numberToAdd->StatementName, ""));
-                                        } else if (possibleValue->StatementType.Type == Types::DOUBLE) {
+                                        } else if (numberToAdd->StatementType.Type == Types::DOUBLE) {
                                             double v_double = stringToDouble(possibleValue->StatementName, "");
                                             Instruction::TantQue::increment_double_operatorUpperLower(var.value(),
                                                                                                       v_double, data,
@@ -118,13 +116,13 @@ namespace FPL::Parser {
                                     }
                                 } else if (action_tant_que == "decrementer") {
                                     if (possibleOperator->TokenText == "<") {
-                                        if (possibleValue->StatementType.Type == Types::INT) {
+                                        if (numberToAdd->StatementType.Type == Types::INT) {
                                             int v_int = stringToInt(possibleValue->StatementName, "");
                                             Instruction::TantQue::decrement_int_operatorLowerUpper(var.value(), v_int,
                                                                                                    data, TantQue_Tokens,
                                                                                                    fonction,
                                                                                                    stringToInt(numberToAdd->StatementName, ""));
-                                        } else if (possibleValue->StatementType.Type == Types::DOUBLE) {
+                                        } else if (numberToAdd->StatementType.Type == Types::DOUBLE) {
                                             double v_double = stringToDouble(possibleValue->StatementName, "");
                                             Instruction::TantQue::decrement_double_operatorLowerUpper(var.value(), v_double,
                                                                                                    data, TantQue_Tokens,
@@ -132,13 +130,13 @@ namespace FPL::Parser {
                                                                                                    stringToDouble(numberToAdd->StatementName, ""));
                                         }
                                     } else if (possibleOperator->TokenText == ">") {
-                                        if (possibleValue->StatementType.Type == Types::INT) {
+                                        if (numberToAdd->StatementType.Type == Types::INT) {
                                             int v_int = stringToInt(possibleValue->StatementName, "");
                                             Instruction::TantQue::decrement_int_operatorUpperLower(var.value(), v_int,
                                                                                                    data, TantQue_Tokens,
                                                                                                    fonction,
                                                                                                    stringToInt(numberToAdd->StatementName, ""));
-                                        } else if (possibleValue->StatementType.Type == Types::DOUBLE) {
+                                        } else if (numberToAdd->StatementType.Type == Types::DOUBLE) {
                                             double v_double = stringToDouble(possibleValue->StatementName, "");
                                             Instruction::TantQue::decrement_double_operatorUpperLower(var.value(), v_double,
                                                                                                       data, TantQue_Tokens,
@@ -321,7 +319,7 @@ namespace FPL::Parser {
 
                 while (data.current_token != data.end_token) {
                     auto currentToken = data.current_token;
-                    if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" || currentToken->TokenText == "paquet") {
+                    if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" || currentToken->TokenText == "tant") {
                         totalInstructionInDefinition += 1;
                     }
 
@@ -602,7 +600,7 @@ namespace FPL::Parser {
 
                     while (true) {
                         auto currentToken = data.current_token;
-                        if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" || currentToken->TokenText == "paquet") {
+                        if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" || currentToken->TokenText == "tant") {
                             totalInstructionInDefinition += 1;
                         }
 
