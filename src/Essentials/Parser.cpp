@@ -2,6 +2,83 @@
 
 namespace FPL::Parser {
 
+    void Parser::VerifierInstruction(Data::Data &data, std::optional<FPL::FonctionDef>& fonction) {
+        auto possibleVariable = ExpectIdentifiant(data);
+        if (possibleVariable.has_value()) {
+            if (data.Map_Variables.contains(possibleVariable->TokenText)) {
+                if (!ExpectOperator(data, "{").has_value()) {
+                    openNewCode(data);
+                }
+
+                auto variable = data.getVariable(possibleVariable->TokenText);
+
+                while (!ExpectOperator(data, "}").has_value()) {
+                    auto cas_title = ExpectIdentifiant(data);
+                    if (cas_title.has_value() && cas_title->TokenText == "cas") {
+                        auto valueToCompare = ExpectValue(data);
+                        if (!valueToCompare.has_value()) {
+                            VERIFIER_needcas(data);
+                        }
+
+                        if (!ExpectOperator(data, ":").has_value()) {
+                            VERIFIER_openPartOfCode(data);
+                        }
+
+                        std::vector<std::string> actionVeriferCas_Content;
+
+                        while (!ExpectOperator(data, ",").has_value()) {
+                            actionVeriferCas_Content.push_back(data.current_token->TokenText);
+                            data.current_token++;
+                        }
+
+                        std::vector<Tokenizer::Token> FileCode_Tokens = FPL::Tokenizer::TokenBuilder::ParseToken(
+                                FPL::Instruction::FunctionUtils::ReturnStringVector(actionVeriferCas_Content));
+
+                        int value_variable = stringToInt(variable->VariableValue, "");
+                        int value_double_variable = stringToDouble(variable->VariableValue, "");
+                        if (valueToCompare->StatementType.Type == Types::INT && value_variable == stringToInt(valueToCompare->StatementName, "")) {
+                            auto data_f = executeContentCode(FileCode_Tokens, fonction, std::nullopt, data);
+
+                            for (auto const& variables : data_f.Map_Variables) {
+                                auto it = std::find(data_f.Map_Variables.begin(), data_f.Map_Variables.end(), variables);
+                                if (it != data_f.Map_Variables.end()) {
+                                    if (it->second.IsGlobal) {
+                                        data.addVariableToMap(it->second.VariableName,
+                                                              it->second.VariableValue,
+                                                              it->second.VariableType,
+                                                              it->second.NeedDelete,
+                                                              it->second.IsGlobal);
+                                    }
+                                }
+                            }
+                        } else if (valueToCompare->StatementType.Type == Types::DOUBLE && value_double_variable == stringToDouble(valueToCompare->StatementName, "")) {
+                            auto data_f = executeContentCode(FileCode_Tokens, fonction, std::nullopt, data);
+
+                            for (auto const& variables : data_f.Map_Variables) {
+                                auto it = std::find(data_f.Map_Variables.begin(), data_f.Map_Variables.end(), variables);
+                                if (it != data_f.Map_Variables.end()) {
+                                    if (it->second.IsGlobal) {
+                                        data.addVariableToMap(it->second.VariableName,
+                                                              it->second.VariableValue,
+                                                              it->second.VariableType,
+                                                              it->second.NeedDelete,
+                                                              it->second.IsGlobal);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        VERIFIER_needcas_title(data);
+                    }
+                }
+            } else {
+                variableDoesNotExist(data);
+            }
+        } else {
+            variableDoesNotExist(data);
+        }
+    }
+
     void Parser::TantQueInstruction(Data::Data &data, std::optional<FPL::FonctionDef>& fonction) {
         auto endInstruction = ExpectIdentifiant(data);
         if (!endInstruction.has_value() || endInstruction->TokenText != "que") {
@@ -46,7 +123,7 @@ namespace FPL::Parser {
 
                             while (data.current_token != data.end_token) {
                                 auto currentToken = data.current_token;
-                                if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" || currentToken->TokenText == "tant") {
+                                if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" ||  currentToken->TokenText == "verifier" || currentToken->TokenText == "tant") {
                                     totalInstructionInDefinition += 1;
                                 }
 
@@ -319,7 +396,7 @@ namespace FPL::Parser {
 
                 while (data.current_token != data.end_token) {
                     auto currentToken = data.current_token;
-                    if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" || currentToken->TokenText == "tant") {
+                    if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" ||  currentToken->TokenText == "verifier" || currentToken->TokenText == "tant") {
                         totalInstructionInDefinition += 1;
                     }
 
@@ -600,7 +677,7 @@ namespace FPL::Parser {
 
                     while (true) {
                         auto currentToken = data.current_token;
-                        if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" || currentToken->TokenText == "tant") {
+                        if (currentToken->TokenText == "definir" || currentToken->TokenText == "paquet" ||  currentToken->TokenText == "verifier" || currentToken->TokenText == "tant") {
                             totalInstructionInDefinition += 1;
                         }
 
@@ -1144,6 +1221,9 @@ namespace FPL::Parser {
                 return true;
             } else if (Instruction->TokenText == "tant") {
                 TantQueInstruction(data, fonction);
+                return true;
+            } else if (Instruction->TokenText == "verifier") {
+                VerifierInstruction(data, fonction);
                 return true;
             }
         }

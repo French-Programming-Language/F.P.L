@@ -59,5 +59,7 @@ namespace FPL::Parser {
         static void TypeInstruction(FPL::Data::Data &data, std::optional<FPL::Paquet::Paquet> paquet);
 
         static void TantQueInstruction(FPL::Data::Data &data, std::optional<FPL::FonctionDef>& fonction);
+
+        static void VerifierInstruction(Data::Data &data, std::optional<FPL::FonctionDef>& fonction);
     };
 }
