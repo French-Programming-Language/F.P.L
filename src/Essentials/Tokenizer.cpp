@@ -70,14 +70,6 @@ namespace FPL::Tokenizer {
                     } else{
                         currentToken.TokenText.append(1, element);
                     }
-                    /*else if (currentToken.TokenType == CHAINE_LITTERAL) {
-                        currentToken.TokenText.append(1, element);
-                    } else {
-                        TokenBuilder::ParseEndToken(currentToken, AllTokens);
-                        currentToken.TokenType = OPERATEUR;
-                        currentToken.TokenText.append(1, element);
-                        TokenBuilder::ParseEndToken(currentToken, AllTokens);
-                    }*/
                     break;
 
                 case '{':
