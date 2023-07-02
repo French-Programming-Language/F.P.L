@@ -1,7 +1,10 @@
-variable decimal i -> 0.0;
+variable entier a -> 5;
 
-tant que i < 2 incrementer 0.5 {
-    envoyer "i (1) : " i;
+verifier a {
+    cas 5:
+    envoyer 10;
+    ,
+    cas 5:
+    envoyer 25;
+    ,
 }
-
-envoyer "La valeur i vaut a la fin : " i;
