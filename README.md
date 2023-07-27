@@ -2,11 +2,11 @@
 
 F.P.L. est un langage de programmation français réalisé par Program.
 
-Le Python est un langage nommé "simple" pour faire apprendre aux étudiants le code. 
+Le Python est un langage nommé "simple" pour faire apprendre aux étudiants le code.
 
 Cependant, ce n'est pas vraiment ma vision, le Python est rapide, mais non facile à comprendre !
 
-Par conséquent, j'ai décidé de créer un langage de programmation en style français. 
+Par conséquent, j'ai décidé de créer un langage de programmation en style français.
 
 Avant de commencer, merci de prendre attention à cette page : [code de conduite](CodeOfConduct.md).
 
@@ -18,7 +18,7 @@ Je les remercie **énormément**, ils m'ont permis d'avoir accès à leurs logic
 
 Je remercie également mes amis et la communauté de F.P.L.
 
-Honnêtement, j'adore utiliser leurs outils et ce qu'ils proposent est juste incroyable. 
+Honnêtement, j'adore utiliser leurs outils et ce qu'ils proposent est juste incroyable.
 
 Cela dépend de vos gouts, mais si vous le souhaitez (et je vous conseille) vous pouvez essayer les outils et voir s'ils sont bons à vos yeux.
 
@@ -35,7 +35,7 @@ Le fichier avec l'extension *.exe* et *.fpl* doivent être **dans le même répe
 
 Une fois que cela est fait, vous glissez le fichier *.exe* dans la console et vous pouvez faire la touche *Enter*/*Entrer* (une touche assez grosse qui a une flèche qui va vers la gauche au centre).
 
-Vous verrez apparaître : 
+Vous verrez apparaître :
 
 ```
 Fichier :
