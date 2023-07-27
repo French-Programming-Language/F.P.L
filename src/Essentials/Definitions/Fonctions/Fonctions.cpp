@@ -1,5 +1,7 @@
 #include "Fonctions.h"
 
+#include <utility>
+
 std::string FPL::Definition::Fonctions::Fonction::getName() {
     return this->name;
 }
@@ -21,7 +23,7 @@ void FPL::Definition::Fonctions::Fonction::setName(const std::string &n) {
 }
 
 void FPL::Definition::Fonctions::Fonction::setReturnValue(FPL::Definition::Values::Value v) {
-    this->returnValue = v;
+    this->returnValue = std::move(v);
 }
 
 bool FPL::Definition::Fonctions::Fonction::isArgument(const std::string& a) {

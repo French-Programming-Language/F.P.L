@@ -16,6 +16,9 @@ using namespace FPL::Definition::Variables;
 namespace FPL::Essential::Data {
     class Data {
     public:
+        std::string returnFunctionValue;
+        Type returnFunctionType;
+
         std::map<std::string, Variable> Variables; // Nom Variable, Object &Variable
         std::map<std::string, FPL::Definition::Fonctions::Fonction> Fonctions; // Nom Variable, Object &Variable
 

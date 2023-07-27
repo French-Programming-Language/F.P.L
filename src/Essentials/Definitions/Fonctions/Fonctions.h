@@ -39,8 +39,9 @@ namespace FPL::Definition::Fonctions {
         Values::Value returnValue;
         std::unordered_map<std::string, Argument> arguments;
         std::vector<FPL::Essential::Tokenizer::Token> tokensInFunction;
-
     public:
+        bool isEmptyOptional = false;
+
         Fonction();
         Fonction(std::string const& n, Values::Value const& v, std::vector<FPL::Essential::Tokenizer::Token> const& tokens);
 
