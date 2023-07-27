@@ -40,24 +40,25 @@ namespace FPL::Essential::Parser {
     public:
         static void main(std::vector<Token> tokenList);
         static Data::Data executeCode(std::vector<Token> tokenList, std::optional<Data::Data> old_data, const std::optional<std::string>& paquet, std::optional<Fonctions::Fonction> fonction);
-        static bool managerInstructions( std::vector<Token>::iterator& currentToken, Data::Data& data, std::vector<Token> tokenList, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction);
+        static bool managerInstructions( std::vector<Token>::iterator& currentToken, Data::Data& data, std::vector<Token> tokenList, const std::optional<std::string>& paquet, std::optional<Fonctions::Fonction>& fonction);
 
         // Basics:
-        static void ENVOYER_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction);
+        static void ENVOYER_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, const std::optional<Fonctions::Fonction> &fonction);
         static void VARIABLE_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::optional<std::string> paquet, const std::optional<Fonctions::Fonction>& fonction);
-        static void CHANGER_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction);
+        static void CHANGER_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data);
         static void SAISIR_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::optional<std::string> paquet, std::optional<Fonctions::Fonction> fonction);
-        static void FICHIER_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction);
-        static void CONSTANTE_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::optional<std::string> paquet, const std::optional<Fonctions::Fonction>& fonction);
-        static void GLOBALE_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::optional<std::string> paquet, const std::optional<Fonctions::Fonction>& fonction);
-        static void RETIRER_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction);
-        static void IMPORTER_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, const std::optional<std::string>& paquet, std::optional<Fonctions::Fonction> fonction);
-        static void CONVERTIR_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction);
-        static void VERIFIER_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, const std::optional<std::string>& paquet, std::optional<Fonctions::Fonction> fonction);
+        static void FICHIER_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data);
+        static void CONSTANTE_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, std::optional<std::string> paquet, const std::optional<Fonctions::Fonction>& fonction);
+        static void GLOBALE_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, std::optional<std::string> paquet, const std::optional<Fonctions::Fonction>& fonction);
+        static void RETIRER_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data);
+        static void IMPORTER_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, const std::optional<std::string>& paquet, std::optional<Fonctions::Fonction> fonction);
+        static void CONVERTIR_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data);
+        static void VERIFIER_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, const std::optional<std::string>& paquet, std::optional<Fonctions::Fonction> fonction);
         static void TANT_QUE_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::vector<Token> tokenList, const std::optional<std::string>& paquet, std::optional<Fonctions::Fonction> fonction);
-        static void PAQUET_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::vector<Token> tokenList, std::optional<std::string> paquet, std::optional<Fonctions::Fonction> fonction);
-        static void DEFINIR_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::vector<Token> tokenList, std::optional<std::string> paquet, const std::optional<Fonctions::Fonction>& fonction);
-        static void APPELER_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::vector<Token>& tokenList, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction);
-        static void MATH_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::vector<Token>& tokenList, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction);
+        static void PAQUET_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, std::vector<Token> tokenList, std::optional<std::string> paquet, std::optional<Fonctions::Fonction> fonction);
+        static void DEFINIR_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::vector<Token> tokenList, std::optional<std::string> paquet);
+        static void APPELER_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, const std::optional<std::string>& paquet, std::optional<Fonctions::Fonction>& fonction);
+        static void MATH_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, std::vector<Token> &tokenList);
+        static void RENVOYER_Instruction(std::vector<Token>::iterator& currentToken, std::optional<Fonctions::Fonction>& fonction);
     };
 }

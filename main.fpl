@@ -1,0 +1,6 @@
+definir a() {
+    renvoyer "cc"
+}
+
+appeler a -> b
+envoyer b

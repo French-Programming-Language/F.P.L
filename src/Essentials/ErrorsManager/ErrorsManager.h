@@ -37,3 +37,4 @@ void FUNC_needToAddArgumentInCall(std::vector<Token>::iterator token);
 void TANTQUE_varWrongType(std::vector<Token>::iterator token);
 void TANTQUE_valueWrongType(std::vector<Token>::iterator token);
 void forgotOpenBloc(std::vector<Token>::iterator token);
+void RENVOYER_canNot(std::vector<Token>::iterator token);

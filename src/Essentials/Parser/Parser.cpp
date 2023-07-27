@@ -7,7 +7,8 @@ namespace FPL::Essential::Parser {
         auto currentToken = tokenList.begin();
 
         while (currentToken != tokenList.end()) {
-            if (!managerInstructions(currentToken, main_data, tokenList, std::nullopt, std::nullopt)) {
+            if (!managerInstructions(currentToken, main_data, tokenList, std::nullopt,
+                                     (std::optional<Fonctions::Fonction> &) std::nullopt)) {
                 std::cerr << "Inconnu: " << currentToken->content << ", ligne " << currentToken->lineNumber << "." << std::endl;
                 ++currentToken;
                 continue;
@@ -37,23 +38,23 @@ namespace FPL::Essential::Parser {
         return data;
     }
 
-    bool Parser::managerInstructions(std::vector<Token>::iterator& currentToken, Data::Data &data, std::vector<Token> tokenList, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction) {
+    bool Parser::managerInstructions(std::vector<Token>::iterator& currentToken, Data::Data &data, std::vector<Token> tokenList, const std::optional<std::string>& paquet, std::optional<Fonctions::Fonction>& fonction) {
         auto instruction = ExpectIdentifiant(currentToken);
         if (instruction.has_value()) {
             if (instruction->content == "envoyer") {
-                ENVOYER_Instruction(currentToken, data, paquet, fonction);
+                ENVOYER_Instruction(currentToken, data, fonction);
                 return true;
             } else if (instruction->content == "variable") {
                 VARIABLE_Instruction(currentToken, data, paquet, fonction);
                 return true;
             } else if (instruction->content == "changer") {
-                CHANGER_Instruction(currentToken, data, paquet, fonction);
+                CHANGER_Instruction(currentToken, data);
                 return true;
             } else if (instruction->content == "saisir") {
                 SAISIR_Instruction(currentToken, data, paquet, fonction);
                 return true;
             } else if (instruction->content == "fichier") {
-                FICHIER_Instruction(currentToken, data, paquet, fonction);
+                FICHIER_Instruction(currentToken, data);
                 return true;
             } else if (instruction->content == "constante") {
                 CONSTANTE_Instruction(currentToken, data, paquet, fonction);
@@ -62,38 +63,41 @@ namespace FPL::Essential::Parser {
                 GLOBALE_Instruction(currentToken, data, paquet, fonction);
                 return true;
             } else if (instruction->content == "retirer") {
-                RETIRER_Instruction(currentToken, data, paquet, fonction);
+                RETIRER_Instruction(currentToken, data);
                 return true;
             } else if (instruction->content == "importer") {
                 IMPORTER_Instruction(currentToken, data, paquet, fonction);
                 return true;
             } else if (instruction->content == "convertir") {
-                CONVERTIR_Instruction(currentToken, data, paquet, fonction);
+                CONVERTIR_Instruction(currentToken, data);
                 return true;
             } else if (instruction->content == "verifier") {
                 VERIFIER_Instruction(currentToken, data, paquet, fonction);
                 return true;
             } else if (instruction->content == "tantque") {
-                TANT_QUE_Instruction(currentToken, data, std::move(tokenList), paquet, fonction);
+                TANT_QUE_Instruction(currentToken, data, tokenList, paquet, fonction);
                 return true;
             } else if (instruction->content == "paquet") {
                 PAQUET_Instruction(currentToken, data, tokenList, paquet, fonction);
                 return true;
             } else if (instruction->content == "definir") {
-                DEFINIR_Instruction(currentToken, data, tokenList, paquet, fonction);
+                DEFINIR_Instruction(currentToken, data, tokenList, paquet);
                 return true;
             } else if (instruction->content == "appeler") {
-                APPELER_Instruction(currentToken, data, tokenList, paquet, fonction);
+                APPELER_Instruction(currentToken, data, paquet, fonction);
                 return true;
             } else if (instruction->content == "math") {
-                MATH_Instruction(currentToken, data, tokenList, paquet, fonction);
+                MATH_Instruction(currentToken, data, tokenList);
+                return true;
+            } else if (instruction->content == "renvoyer") {
+                RENVOYER_Instruction(currentToken, fonction);
                 return true;
             }
         }
         return false;
     }
 
-    void Parser::ENVOYER_Instruction( std::vector<Token>::iterator& currentToken, Data::Data& data, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction) {
+    void Parser::ENVOYER_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, const std::optional<Fonctions::Fonction> &fonction) {
         bool pass = false;
 
         FPL::Instruction::Envoyer::getInformation(currentToken, data, pass, fonction);
@@ -116,7 +120,7 @@ namespace FPL::Essential::Parser {
         std::cout << std::endl;
     }
 
-    void Parser::VARIABLE_Instruction( std::vector<Token>::iterator& currentToken, Data::Data& data, std::optional<std::string> paquet, const std::optional<Fonctions::Fonction>& fonction) {
+    void Parser::VARIABLE_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::optional<std::string> paquet, const std::optional<Fonctions::Fonction>& fonction) {
         if (paquet.has_value()) {
             Variable var = FPL::Instruction::VariablesUtils::defineVariable_Paquet(currentToken, data, paquet.value(), fonction);
 
@@ -136,7 +140,7 @@ namespace FPL::Essential::Parser {
         }
     }
 
-    void Parser::CHANGER_Instruction( std::vector<Token>::iterator& currentToken, Data::Data& data, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction) {
+    void Parser::CHANGER_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data) {
         auto var_name = ExpectIdentifiant(currentToken);
         if (!var_name.has_value()) {
             CHANGER_Instruction_unknowVariable(currentToken);
@@ -168,7 +172,7 @@ namespace FPL::Essential::Parser {
         data.updateVariableValue(var.value(), new_var_value->content);
     }
 
-    void Parser::SAISIR_Instruction( std::vector<Token>::iterator& currentToken, Data::Data& data, std::optional<std::string> paquet, std::optional<Fonctions::Fonction> fonction) {
+    void Parser::SAISIR_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::optional<std::string> paquet, std::optional<Fonctions::Fonction> fonction) {
         auto var_type = ExpectType(currentToken);
         if (!var_type.has_value()) {
             forgotType(currentToken);
@@ -223,7 +227,7 @@ namespace FPL::Essential::Parser {
         data.pushVariable(var);
     }
 
-    void Parser::FICHIER_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction) {
+    void Parser::FICHIER_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data) {
         auto instru = ExpectIdentifiant(currentToken);
         if (!instru.has_value()) {
             missingparameter(currentToken);
@@ -365,7 +369,7 @@ namespace FPL::Essential::Parser {
         }
     }
 
-    void Parser::RETIRER_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction) {
+    void Parser::RETIRER_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data) {
         auto var_name = ExpectIdentifiant(currentToken);
 
         if (!var_name.has_value()) {
@@ -394,7 +398,7 @@ namespace FPL::Essential::Parser {
 
         std::string contentFile((std::istreambuf_iterator<char>(fichier_fpl)), (std::istreambuf_iterator<char>()));
         auto const TokenList = TokenBuilder::CodeToTokens(contentFile);
-        auto next_data = FPL::Essential::Parser::Parser::executeCode(TokenList, std::nullopt, paquet, std::move(fonction));
+        auto next_data = FPL::Essential::Parser::Parser::executeCode(TokenList, std::nullopt, paquet, fonction);
 
         for (auto const& var : next_data.Variables) {
             if (var.second.isGlobal()) {
@@ -403,7 +407,7 @@ namespace FPL::Essential::Parser {
         }
     }
 
-    void Parser::CONVERTIR_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction) {
+    void Parser::CONVERTIR_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data) {
         auto var_name = ExpectIdentifiant(currentToken);
         if (!var_name.has_value()) {
             forgotvariable(currentToken);
@@ -733,7 +737,7 @@ namespace FPL::Essential::Parser {
         }
     }
 
-    void Parser::DEFINIR_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::vector<Token> tokenList, std::optional<std::string> paquet, const std::optional<Fonctions::Fonction>& fonction) {
+    void Parser::DEFINIR_Instruction(std::vector<Token>::iterator& currentToken, Data::Data& data, std::vector<Token> tokenList, std::optional<std::string> paquet) {
         auto f_name = ExpectIdentifiant(currentToken);
         if (!f_name.has_value()) {
             forgotName(currentToken);
@@ -803,7 +807,7 @@ namespace FPL::Essential::Parser {
         }
     }
 
-    void Parser::APPELER_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, std::vector<Token>& tokenList, const std::optional<std::string>& paquet, const std::optional<Fonctions::Fonction>& fonction) {
+    void Parser::APPELER_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, const std::optional<std::string>& paquet, std::optional<Fonctions::Fonction>& fonction) {
         auto f_name = ExpectIdentifiant(currentToken);
         if (!f_name) {
             forgotName(currentToken);
@@ -822,6 +826,20 @@ namespace FPL::Essential::Parser {
                 if (v.second.isGlobal()) {
                     data.pushVariable(v.second);
                 }
+            }
+
+            if (ExpectEqualOperator(currentToken)) {
+                auto var_name = ExpectIdentifiant(currentToken);
+                if (!var_name.has_value()) {
+                    forgotName(currentToken);
+                }
+
+                Variable var;
+                var.setName(var_name->content);
+                var.setType(fonction->getReturnValue().type);
+                var.setValue(fonction->getReturnValue().content);
+
+                data.pushVariable(var);
             }
         } else {
             if(!ExpectOperator(currentToken, "(").has_value()) {
@@ -874,10 +892,24 @@ namespace FPL::Essential::Parser {
                     data.pushVariable(v.second);
                 }
             }
+
+            if (ExpectEqualOperator(currentToken)) {
+                auto var_name = ExpectIdentifiant(currentToken);
+                if (!var_name.has_value()) {
+                    forgotName(currentToken);
+                }
+
+                Variable var;
+                var.setName(var_name->content);
+                var.setType(fonction->getReturnValue().type);
+                var.setValue(fonction->getReturnValue().content);
+
+                data.pushVariable(var);
+            }
         }
     }
 
-    void Parser::MATH_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, std::vector<Token> &tokenList, const std::optional<std::string> &paquet, const std::optional<Fonctions::Fonction> &fonction) {
+    void Parser::MATH_Instruction(std::vector<Token>::iterator &currentToken, Data::Data &data, std::vector<Token> &tokenList) {
         auto var_name = ExpectIdentifiant(currentToken);
         if (!var_name) {
             forgotName(currentToken);
@@ -899,5 +931,18 @@ namespace FPL::Essential::Parser {
 
         Variable var(var_name->content, std::to_string(result), Definition::Types::DOUBLE);
         data.pushVariable(var);
+    }
+
+    void Parser::RENVOYER_Instruction(std::vector<Token>::iterator &currentToken, std::optional<Fonctions::Fonction> &fonction) {
+        if (!fonction.has_value()) {
+            RENVOYER_canNot(currentToken);
+        }
+
+        auto value = ExpectValue(currentToken);
+        if (!value.has_value()) {
+            forgotValue(currentToken);
+        }
+
+        fonction->setReturnValue(value.value());
     }
 }

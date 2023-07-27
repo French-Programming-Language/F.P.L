@@ -37,3 +37,4 @@ CREATE_ERROR(FUNC_needToAddArgumentInCall, "Vous devez ajouter ',' pour continue
 CREATE_ERROR(TANTQUE_varWrongType, "La variable doit etre de type entier ou decimal, ligne ", 31)
 CREATE_ERROR(TANTQUE_valueWrongType, "La/Les valeur(s) precise doit/doivent etre de type entier ou decimal, ligne ", 32)
 CREATE_ERROR(forgotOpenBloc, "Vous devez utiliser '[' pour ouvrir un nouveau bloc et le fermer avec ']', ligne ", 33)
+CREATE_ERROR(RENVOYER_canNot, "Vous devez utiliser 'renvoyer' dans une fonction, ligne ", 34)
