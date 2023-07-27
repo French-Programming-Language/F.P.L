@@ -1,10 +1,2 @@
-variable entier a -> 5;
-
-verifier a {
-    cas 5:
-    envoyer 10;
-    ,
-    cas 5:
-    envoyer 25;
-    ,
-}
+math a [ 10 + 5 - 2 ]
+envoyer a

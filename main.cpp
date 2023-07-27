@@ -1,28 +1,34 @@
 #include <iostream>
+#include <fstream>
 
-#include "src/Essentials/Tokenizer.h"
-#include "src/Essentials/Parser.h"
+#include "src/Essentials/Tokenizer/Tokenizer.h"
+#include "src/Essentials/Parser/Parser.h"
 
 using namespace FPL;
+using namespace FPL::Essential;
+using namespace FPL::Essential::Tokenizer;
 
 int main(int argc, char** argv) {
-    std::string fileName;
+    std::string pos_FileName;
     if (argc == 2) {
-        fileName = argv[1];
+        pos_FileName = argv[1];
     } else {
         std::cout << "Fichier : ";
-        std::cin >> fileName;
+        std::cin >> pos_FileName;
         std::cout << std::endl;
     }
-    std::ifstream file { fileName};
-    if (!file) {
-        std::cerr << "Donnez le nom correct du fichier." << std::endl;
+
+    std::ifstream fichier_fpl {pos_FileName};
+    if (!fichier_fpl) {
+        std::cerr << "Fichier introuvable !" << std::endl;
         return -1;
     }
-    std::string FileCode((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
 
-    std::vector<Tokenizer::Token> FileCode_Tokens = FPL::Tokenizer::TokenBuilder::ParseToken(FileCode);
-    FPL::Parser::Parser::ParserCode(FileCode_Tokens);
+    std::string contentFile((std::istreambuf_iterator<char>(fichier_fpl)), (std::istreambuf_iterator<char>()));
+
+    auto const TokenList = TokenBuilder::CodeToTokens(contentFile);
+
+    FPL::Essential::Parser::Parser::main(TokenList);
 
     return 0;
 }

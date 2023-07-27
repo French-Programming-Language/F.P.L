@@ -1,43 +1,45 @@
-cmake_minimum_required(VERSION 3.22)
-project(French_Programming_Language)
+cmake_minimum_required(VERSION 3.25)
+project(FPL)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++ -lwsock32 -lws2_32 ${CMAKE_CSS_STANDARD_LIBRARIES}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive")
+set(CMAKE_CXX_STANDARD 23)
 
-add_executable(French_Programming_Language
+add_executable(FPL
         main.cpp
-
-        src/Essentials/Tokenizer.cpp
-        src/Essentials/Tokenizer.h
-        src/Essentials/Parser.cpp
-        src/Essentials/Parser.h
-        src/Essentials/Types.cpp
-        src/Essentials/Types.h
-        src/Essentials/Statement.cpp
-        src/Essentials/Statement.h
-        src/Essentials/Utils/Expecter.cpp
-        src/Essentials/Utils/Expecter.h
-        src/Essentials/Utils/Data.cpp
-        src/Essentials/Utils/Data.h
-        src/Essentials/Utils/ErrorsCodeManagement.cpp
-        src/Essentials/Utils/ErrorsCodeManagement.h
-        src/Essentials/Definitions/Variables.cpp
-        src/Essentials/Definitions/Variables.h
-        src/Essentials/MathUtils/Converts.h
-        src/Essentials/MathUtils/Converts.cpp
-        src/Essentials/Utils/Vectors.cpp
-        src/Essentials/Utils/Vectors.h
-
-        src/Instructions/Prints.cpp
-        src/Instructions/Prints.h
-        src/Instructions/Inputs.cpp
-        src/Instructions/Inputs.h
-
-        src/Essentials/MathUtils/MathParser/MathTokenizer.cpp
-        src/Essentials/MathUtils/MathParser/MathTokenizer.h
-        src/Essentials/MathUtils/MathParser/MathParser.cpp
-        src/Essentials/MathUtils/MathParser/MathParser.h
-        src/Essentials/MathUtils/MathParser/Utils/Converts.cpp
-        src/Essentials/MathUtils/MathParser/Utils/Converts.h
-        src/Essentials/Definitions/Fonction.cpp src/Essentials/Definitions/Fonction.h src/Essentials/Definitions/Paquet.cpp src/Essentials/Definitions/Paquet.h src/Instructions/FunctionsUtils.cpp src/Instructions/FunctionsUtils.h src/Instructions/TantQue_Loop.cpp src/Instructions/TantQue_Loop.h)
+        src/Essentials/Tokenizer/Tokenizer.cpp
+        src/Essentials/Tokenizer/Tokenizer.h
+        src/Essentials/Parser/Parser.cpp
+        src/Essentials/Parser/Parser.h
+        src/Essentials/Data/Data.cpp
+        src/Essentials/Data/Data.h
+        src/Essentials/Definitions/Variables/Variables.cpp
+        src/Essentials/Definitions/Variables/Variables.h
+        src/Essentials/Definitions/Types/Types.cpp
+        src/Essentials/Definitions/Types/Types.h
+        src/Essentials/Expecter/Expecter.cpp
+        src/Essentials/Expecter/Expecter.h
+        src/Essentials/ErrorsManager/ErrorsManager.cpp
+        src/Essentials/ErrorsManager/ErrorsManager.h
+        src/Essentials/Definitions/Value/Value.cpp
+        src/Essentials/Definitions/Value/Value.h
+        src/Instructions/envoyer/Envoyer.h
+        src/Instructions/envoyer/Envoyer.cpp
+        src/Utils/stringTo.h src/Utils/stringTo.cpp
+        src/Instructions/saisir/Saisir.h
+        src/Instructions/saisir/Saisir.cpp
+        src/Instructions/VariablesUtils/Variables.cpp
+        src/Instructions/VariablesUtils/Variables.h
+        src/Utils/VectorsTo.cpp
+        src/Utils/VectorsTo.h
+        src/Essentials/Definitions/Fonctions/Fonctions.cpp
+        src/Essentials/Definitions/Fonctions/Fonctions.h
+        src/Instructions/Conditions/verifier.cpp
+        src/Instructions/Conditions/verifier.h
+        src/Utils/MathUtils/Converts.h
+        src/Utils/MathUtils/Converts.cpp
+        src/Utils/MathUtils/MathParser/Utils/Converts.h
+        src/Utils/MathUtils/MathParser/Utils/Converts.cpp
+        src/Utils/MathUtils/MathParser/MathParser.h
+        src/Utils/MathUtils/MathParser/MathParser.cpp
+        src/Utils/MathUtils/MathParser/MathTokenizer.h
+        src/Utils/MathUtils/MathParser/MathTokenizer.cpp
+        )
